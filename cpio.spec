@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.4.2
-Release: 27
+Release: 28
 License: GPL
 Group: Applications/Archiving
 Source: ftp://prep.ai.mit.edu/pub/gnu/cpio-2.4.2.tar.gz
@@ -109,6 +109,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Fri Jun 21 2002 Tim Powers <timp@redhat.com>
+- automated rebuild
+
 * Thu May 23 2002 Tim Powers <timp@redhat.com>
 - automated rebuild
 
