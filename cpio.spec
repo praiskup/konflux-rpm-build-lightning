@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.4.2
-Release: 20
+Release: 21
 Copyright: GPL
 Group: Applications/Archiving
 Source: ftp://prep.ai.mit.edu/pub/gnu/cpio-2.4.2.tar.gz
