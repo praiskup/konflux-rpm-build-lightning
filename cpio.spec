@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.5.90
-Release: 1
+Release: 2  
 License: GPL
 Group: Applications/Archiving
 URL: ftp://ftp.gnu.org/pub/gnu/cpio/
