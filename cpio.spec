@@ -6,8 +6,8 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.4.2
-Release: 22
-Copyright: GPL
+Release: 23
+License: GPL
 Group: Applications/Archiving
 Source: ftp://prep.ai.mit.edu/pub/gnu/cpio-2.4.2.tar.gz
 Patch0: cpio-2.3-lstat.patch
@@ -21,6 +21,7 @@ Patch7: cpio-2.4.2-stdout.patch
 Patch8: cpio-2.4.2-fhs.patch
 Patch9: cpio-2.4.2-errorcode.patch
 Patch10: cpio-2.4.2-man.patch
+Patch11: cpio-2.4.2-debian36.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -57,6 +58,7 @@ Install cpio if you need a program to manage file archives.
 %patch8 -p1 -b .fhs
 %patch9 -p1 -b .errorcode
 %patch10 -p1 -b .man
+%patch11 -p1 -b .debian
 
 %build
 
@@ -103,6 +105,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue Jun 26 2001 Bernhard Rosenkraenzer <bero@redhat.com>
+- Add and adapt Debian patch (pl36), fixes #45285 and a couple of other issues
+
 * Sun Jun 24 2001 Elliot Lee <sopwith@redhat.com>
 - Bump release + rebuild.
 
