@@ -5,18 +5,18 @@
 
 Summary: A GNU archiving program.
 Name: cpio
-Version: 2.5.90
-Release: 3  
+Version: 2.5
+Release: 9
 License: GPL
 Group: Applications/Archiving
 URL: ftp://ftp.gnu.org/pub/gnu/cpio/
-Source: ftp://ftp.gnu.org/pub/gnu/cpio/cpio-2.5.90.tar.gz
-Patch0: cpio-2.5.90-rh.patch
-Patch13: cpio-2.5.90-nolibnsl.patch
-Patch14: cpio-2.5.90-lfs.patch
-Patch15: cpio-2.5.90-throw.patch
-Patch16: cpio-2.5.90-optimize.patch
-Patch17: cpio-2.5.90-error.patch
+Source: ftp://ftp.gnu.org/pub/gnu/cpio/cpio-2.5.tar.gz
+Patch0: cpio-2.5-rh.patch
+Patch10: cpio-2.4.2-freebsd.patch
+Patch11: cpio-2.4.2-bug56346.patch
+Patch12: cpio-2.5-i18n-0.1.patch
+Patch13: cpio-2.5-nolibnsl.patch
+Patch14: cpio-2.5-lfs.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -42,12 +42,11 @@ Install cpio if you need a program to manage file archives.
 %prep
 %setup -q
 %patch0 -p1 -b .rh
-%patch13 -p1 -b .nolibnsl
+#%patch10 -p1 -b .fbsd
+#%patch11 -p1 -b .multilink
+%patch12 -p1 -b .i18n
+%patch13 -p1
 %patch14 -p1 -b .lfs
-%patch15 -p1 -b .throw
-%patch16 -p1 -b .optimize
-%patch17 -p1 -b .error
-
 
 %build
 
@@ -93,18 +92,8 @@ fi
 %{_mandir}/man*/*
 
 %{_infodir}/*.info*
-%{_datadir}/locale/*
 
 %changelog
-* Mon Nov 08 2004 Peter Vrabec <pvrabec@redhat.com>
-- add error 'n' optimize patch
-
-* Mon Nov 08 2004 Peter Vrabec <pvrabec@redhat.com>
-- add throw patch
-
-* Mon Nov 08 2004 Peter Vrabec <pvrabec@redhat.com>
-- update to 2.5.9
-
 * Mon Nov 01 2004 Peter Vrabec <pvrabec@redhat.com>
 - support large files > 2GB (#105617)
 
