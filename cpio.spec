@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.5
-Release: 8
+Release: 9
 License: GPL
 Group: Applications/Archiving
 URL: ftp://ftp.gnu.org/pub/gnu/cpio/
@@ -16,6 +16,7 @@ Patch10: cpio-2.4.2-freebsd.patch
 Patch11: cpio-2.4.2-bug56346.patch
 Patch12: cpio-2.5-i18n-0.1.patch
 Patch13: cpio-2.5-nolibnsl.patch
+Patch14: cpio-2.5-lfs.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -45,10 +46,11 @@ Install cpio if you need a program to manage file archives.
 #%patch11 -p1 -b .multilink
 %patch12 -p1 -b .i18n
 %patch13 -p1
+%patch14 -p1 -b .lfs
 
 %build
 
-CFLAGS="$RPM_OPT_FLAGS -D_BSD_SOURCE" %configure
+CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE" %configure
 make
 
 %install
@@ -92,6 +94,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon Nov 01 2004 Peter Vrabec <pvrabec@redhat.com>
+- support large files > 2GB (#105617)
+
 * Thu Oct 21 2004 Peter Vrabec <pvrabec@redhat.com>
 - fix dependencies in spec
 
