@@ -1,0 +1,22 @@
+--- cpio-2.5.90/doc/cpio.info.rh	2004-02-27 12:42:01.000000000 +0000
++++ cpio-2.5.90/doc/cpio.info	2004-11-04 14:40:57.000000000 +0000
+@@ -261,7 +261,8 @@
+      Set the I/O block size to BLOCK-SIZE * 512 bytes.
+ 
+ `-c'
+-     Use the old portable (ASCII) archive format.
++     Identical to "-H newc", use the new (SVR4) portable format.
++     If you wish the old portable (ASCII) archive format, use "-H odc" instead.
+ 
+ `-C IO-SIZE, --io-size=IO-SIZE'
+      Set the I/O block size to IO-SIZE bytes.
+--- cpio-2.5.90/src/main.c.rh	2004-09-08 11:41:42.000000000 +0000
++++ cpio-2.5.90/src/main.c	2004-11-05 11:09:59.869355664 +0000
+@@ -302,6 +302,7 @@
+     case 'c':		/* Use the old portable ASCII format.  */
+       if (archive_format != arf_unknown)
+ 	USAGE_ERROR ((0, 0, _("Archive format multiply defined")));
++#define SVR4_COMPAT
+ #ifdef SVR4_COMPAT
+       archive_format = arf_newascii; /* -H newc.  */
+ #else

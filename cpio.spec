@@ -5,19 +5,19 @@
 
 Summary: A GNU archiving program.
 Name: cpio
-Version: 2.5
-Release: 10
+Version: 2.6
+Release: 1
 License: GPL
 Group: Applications/Archiving
-URL: ftp://ftp.gnu.org/pub/gnu/cpio/
-Source: ftp://ftp.gnu.org/pub/gnu/cpio/cpio-2.5.tar.gz
-Patch0: cpio-2.5-rh.patch
-Patch10: cpio-2.4.2-freebsd.patch
-Patch11: cpio-2.4.2-bug56346.patch
-Patch12: cpio-2.5-i18n-0.1.patch
+URL: http://www.gnu.org/software/cpio/
+Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.gz
+Patch0: cpio-2.6-rh.patch
+#Patch10: cpio-2.4.2-freebsd.patch
+#Patch11: cpio-2.4.2-bug56346.patch
+#Patch12: cpio-2.5-i18n-0.1.patch
 Patch13: cpio-2.5-nolibnsl.patch
 Patch14: cpio-2.5-lfs.patch
-Patch15: cpio-2.5-time.patch
+#Patch15: cpio-2.5-time.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -45,10 +45,10 @@ Install cpio if you need a program to manage file archives.
 %patch0 -p1 -b .rh
 #%patch10 -p1 -b .fbsd
 #%patch11 -p1 -b .multilink
-%patch12 -p1 -b .i18n
-%patch13 -p1
+##%patch12 -p1 -b .i18n
+%patch13 -p1 -b .nolibnsl
 %patch14 -p1 -b .lfs
-%patch15 -p1 -b .time
+#%patch15 -p1 -b .time
 
 %build
 
@@ -85,7 +85,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%doc README NEWS
+%doc AUTHORS ChangeLog NEWS README THANKS TODO
 
 %ifnos linux
 %{_libexecdir}/*
@@ -94,8 +94,12 @@ fi
 %{_mandir}/man*/*
 
 %{_infodir}/*.info*
+%{_datadir}/locale/*
 
 %changelog
+* Thu Jan 13 2005 Peter Vrabec <pvrabec@redhat.com>
+- upgrade to cpio-2.6
+
 * Tue Nov 09 2004 Peter Vrabec <pvrabec@redhat.com>
 - fixed "cpio -oH ustar (or tar) saves bad mtime date after Jan 10 2004" (#114580)
 
