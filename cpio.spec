@@ -14,6 +14,7 @@ Source: ftp://ftp.gnu.org/pub/gnu/cpio/cpio-2.5.90.tar.gz
 Patch0: cpio-2.5.90-rh.patch
 Patch13: cpio-2.5.90-nolibnsl.patch
 Patch14: cpio-2.5.90-lfs.patch
+Patch15: cpio-2.5.90-throw.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -41,6 +42,7 @@ Install cpio if you need a program to manage file archives.
 %patch0 -p1 -b .rh
 %patch13 -p1 -b .nolibnsl
 %patch14 -p1 -b .lfs
+%patch15 -p1 -b .throw
 
 %build
 
