@@ -92,6 +92,9 @@ fi
 
 %changelog
 * Mon Nov 08 2004 Peter Vrabec <pvrabec@redhat.com>
+- add throw patch
+
+* Mon Nov 08 2004 Peter Vrabec <pvrabec@redhat.com>
 - update to 2.5.9
 
 * Mon Nov 01 2004 Peter Vrabec <pvrabec@redhat.com>
