@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 3
+Release: 4
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -15,6 +15,7 @@ Patch0: cpio-2.6-rh.patch
 Patch13: cpio-2.5-nolibnsl.patch
 Patch14: cpio-2.6-lfs.patch
 Patch16: cpio-2.6-lstat.patch
+Patch17: cpio-2.6-umask.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -43,6 +44,8 @@ Install cpio if you need a program to manage file archives.
 %patch13 -p1 -b .nolibnsl
 %patch14 -p1 -b .lfs
 %patch16 -p1 -b .lstat
+%patch17 -p1 -b .umask
+
 autoheader
 
 %build
@@ -92,6 +95,9 @@ fi
 %{_datadir}/locale/*
 
 %changelog
+* Mon Jan 24 2005 Peter Vrabec <pvrabec@redhat.com>
+- insecure file creation (#145721)
+
 * Mon Jan 17 2005 Peter Vrabec <pvrabec@redhat.com>
 - fix symlinks pack (#145225)
 
