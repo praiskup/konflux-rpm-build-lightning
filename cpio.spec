@@ -5,25 +5,16 @@
 
 Summary: A GNU archiving program.
 Name: cpio
-Version: 2.4.2
-Release: 28
+Version: 2.5
+Release: 3
 License: GPL
 Group: Applications/Archiving
-Source: ftp://prep.ai.mit.edu/pub/gnu/cpio-2.4.2.tar.gz
-Patch0: cpio-2.3-lstat.patch
-Patch1: cpio-2.4.2-glibc.patch
-Patch2: cpio-2.4.2-mtime.patch
-Patch3: cpio-2.4.2-svr4compat.patch
-Patch4: cpio-2.4.2-glibc21.patch
-Patch5: cpio-2.4.2-longlongdev.patch
-Patch6: cpio-2.4.2-emptylink.patch
-Patch7: cpio-2.4.2-stdout.patch
-Patch8: cpio-2.4.2-fhs.patch
-Patch9: cpio-2.4.2-errorcode.patch
-Patch10: cpio-2.4.2-man.patch
-Patch11: cpio-2.4.2-debian36.patch
-Patch12: cpio-2.4.2-freebsd.patch
-Patch13: cpio-2.4.2-bug56346.patch
+URL: ftp://ftp.gnu.org/pub/gnu/cpio/
+Source: ftp://ftp.gnu.org/pub/gnu/cpio/cpio-2.5.tar.gz
+Patch0: cpio-2.5-rh.patch
+Patch10: cpio-2.4.2-freebsd.patch
+Patch11: cpio-2.4.2-bug56346.patch
+Patch12: cpio-2.5-i18n-0.1.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -48,21 +39,10 @@ Install cpio if you need a program to manage file archives.
 
 %prep
 %setup -q
-# patch 0 not applied
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1 -b .svr4compat
-%patch4 -p1 -b .glibc21
-%patch5 -p1 -b .longlongdev
-%patch6 -p1 -b .emptylink
-# XXX patch7 not applied
-#%patch7 -p1 -b .stdout
-%patch8 -p1 -b .fhs
-%patch9 -p1 -b .errorcode
-%patch10 -p1 -b .man
-%patch11 -p1 -b .debian
-%patch12 -p1 -b .fbsd
-%patch13 -p1 -b .multilink
+%patch0 -p1 -b .rh
+#%patch10 -p1 -b .fbsd
+#%patch11 -p1 -b .multilink
+%patch12 -p1 -b .i18n
 
 %build
 
@@ -81,8 +61,9 @@ rm -rf ${RPM_BUILD_ROOT}
   rm -f .%{_bindir}/mt .%{_mandir}/man1/mt.1
 %endif
 
-  gzip -9nf .%{_infodir}/cpio.*
+# XXX Nuke unpackaged files.
   rm -f .%{_infodir}/dir
+  rm -f ./sbin/rmt
 }
 
 %clean
@@ -109,6 +90,20 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Fri Feb 14 2003 Jeff Johnson <jbj@redhat.com> 2.5-3
+- setlocale for i18n compliance (#79136).
+
+* Wed Jan 22 2003 Tim Powers <timp@redhat.com>
+- rebuilt
+
+* Mon Nov 18 2002 Jeff Johnson <jbj@redhat.com> 2.5-1
+- update 2.5, restack and consolidate patches.
+- don't apply (but include for now) freebsd and #56346 patches.
+- add url (#54598).
+
+* Thu Nov  7 2002 Jeff Johnson <jbj@redhat.com> 2.4.2-30
+- rebuild from CVS.
+
 * Fri Jun 21 2002 Tim Powers <timp@redhat.com>
 - automated rebuild
 
