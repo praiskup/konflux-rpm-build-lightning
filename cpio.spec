@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 2
+Release: 3
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -14,6 +14,7 @@ Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.gz
 Patch0: cpio-2.6-rh.patch
 Patch13: cpio-2.5-nolibnsl.patch
 Patch14: cpio-2.6-lfs.patch
+Patch16: cpio-2.6-lstat.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -41,10 +42,12 @@ Install cpio if you need a program to manage file archives.
 %patch0 -p1 -b .rh
 %patch13 -p1 -b .nolibnsl
 %patch14 -p1 -b .lfs
+%patch16 -p1 -b .lstat
+autoheader
 
 %build
 
-CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE" %configure
+CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -Wall" %configure
 make
 
 %install
@@ -89,7 +92,10 @@ fi
 %{_datadir}/locale/*
 
 %changelog
-* Fri Jan 14 2005 Peter Vrabec<pvrabec@redhat.com>
+* Mon Jan 17 2005 Peter Vrabec <pvrabec@redhat.com>
+- fix symlinks pack (#145225)
+
+* Fri Jan 14 2005 Peter Vrabec <pvrabec@redhat.com>
 - new fixed version of lfs patch (#144688)
 
 * Thu Jan 13 2005 Peter Vrabec <pvrabec@redhat.com>
