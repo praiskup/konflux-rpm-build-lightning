@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.5
-Release: 7
+Release: 8
 License: GPL
 Group: Applications/Archiving
 URL: ftp://ftp.gnu.org/pub/gnu/cpio/
@@ -21,7 +21,7 @@ Patch13: cpio-2.5-nolibnsl.patch
 Prereq: /sbin/rmt
 %endif
 Prereq: /sbin/install-info
-
+BuildRequires: texinfo
 Buildroot: %{_tmppath}/%{name}-root
 
 %description
@@ -92,6 +92,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Thu Oct 21 2004 Peter Vrabec <pvrabec@redhat.com>
+- fix dependencies in spec
+
 * Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
