@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.5
-Release: 5
+Release: 6
 License: GPL
 Group: Applications/Archiving
 URL: ftp://ftp.gnu.org/pub/gnu/cpio/
@@ -92,6 +92,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Fri Feb 13 2004 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
 * Tue Sep 23 2003 Florian La Roche <Florian.LaRoche@redhat.de>
 - do not link against -lnsl
 
