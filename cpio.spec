@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.5.90
-Release: 2  
+Release: 3  
 License: GPL
 Group: Applications/Archiving
 URL: ftp://ftp.gnu.org/pub/gnu/cpio/
@@ -15,6 +15,8 @@ Patch0: cpio-2.5.90-rh.patch
 Patch13: cpio-2.5.90-nolibnsl.patch
 Patch14: cpio-2.5.90-lfs.patch
 Patch15: cpio-2.5.90-throw.patch
+Patch16: cpio-2.5.90-optimize.patch
+Patch17: cpio-2.5.90-error.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -43,6 +45,9 @@ Install cpio if you need a program to manage file archives.
 %patch13 -p1 -b .nolibnsl
 %patch14 -p1 -b .lfs
 %patch15 -p1 -b .throw
+%patch16 -p1 -b .optimize
+%patch17 -p1 -b .error
+
 
 %build
 
@@ -91,6 +96,9 @@ fi
 %{_datadir}/locale/*
 
 %changelog
+* Mon Nov 08 2004 Peter Vrabec <pvrabec@redhat.com>
+- add error 'n' optimize patch
+
 * Mon Nov 08 2004 Peter Vrabec <pvrabec@redhat.com>
 - add throw patch
 
