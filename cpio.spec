@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.4.2
-Release: 23
+Release: 26
 License: GPL
 Group: Applications/Archiving
 Source: ftp://prep.ai.mit.edu/pub/gnu/cpio-2.4.2.tar.gz
@@ -22,6 +22,8 @@ Patch8: cpio-2.4.2-fhs.patch
 Patch9: cpio-2.4.2-errorcode.patch
 Patch10: cpio-2.4.2-man.patch
 Patch11: cpio-2.4.2-debian36.patch
+Patch12: cpio-2.4.2-freebsd.patch
+Patch13: cpio-2.4.2-bug56346.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -59,10 +61,12 @@ Install cpio if you need a program to manage file archives.
 %patch9 -p1 -b .errorcode
 %patch10 -p1 -b .man
 %patch11 -p1 -b .debian
+%patch12 -p1 -b .fbsd
+%patch13 -p1 -b .multilink
 
 %build
 
-%configure
+CFLAGS="$RPM_OPT_FLAGS -D_BSD_SOURCE" %configure
 make
 
 %install
@@ -105,6 +109,16 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Wed Jan 09 2002 Tim Powers <timp@redhat.com>
+- automated rebuild
+
+* Thu Nov 22 2001 Bernhard Rosenkraenzer <bero@redhat.com> 2.4.2-25
+- Fix up extraction of multiply linked files when the first link is
+  excluded (Bug #56346)
+
+* Mon Oct  1 2001 Bernhard Rosenkraenzer <bero@redhat.com> 2.4.2-24
+- Merge and adapt patches from FreeBSD, this should fix FIFO handling
+
 * Tue Jun 26 2001 Bernhard Rosenkraenzer <bero@redhat.com>
 - Add and adapt Debian patch (pl36), fixes #45285 and a couple of other issues
 
