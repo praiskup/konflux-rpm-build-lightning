@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 4
+Release: 5
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -95,6 +95,9 @@ fi
 %{_datadir}/locale/*
 
 %changelog
+* Thu Mar 17 2005 Peter Vrabec <pvrabec@redhat.com>
+- rebuild 2.6-5
+
 * Mon Jan 24 2005 Peter Vrabec <pvrabec@redhat.com>
 - insecure file creation (#145721)
 
