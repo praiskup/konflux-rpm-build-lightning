@@ -5,18 +5,15 @@
 
 Summary: A GNU archiving program.
 Name: cpio
-Version: 2.5
-Release: 9
+Version: 2.5.90
+Release: 1
 License: GPL
 Group: Applications/Archiving
 URL: ftp://ftp.gnu.org/pub/gnu/cpio/
-Source: ftp://ftp.gnu.org/pub/gnu/cpio/cpio-2.5.tar.gz
-Patch0: cpio-2.5-rh.patch
-Patch10: cpio-2.4.2-freebsd.patch
-Patch11: cpio-2.4.2-bug56346.patch
-Patch12: cpio-2.5-i18n-0.1.patch
-Patch13: cpio-2.5-nolibnsl.patch
-Patch14: cpio-2.5-lfs.patch
+Source: ftp://ftp.gnu.org/pub/gnu/cpio/cpio-2.5.90.tar.gz
+Patch0: cpio-2.5.90-rh.patch
+Patch13: cpio-2.5.90-nolibnsl.patch
+Patch14: cpio-2.5.90-lfs.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -42,10 +39,7 @@ Install cpio if you need a program to manage file archives.
 %prep
 %setup -q
 %patch0 -p1 -b .rh
-#%patch10 -p1 -b .fbsd
-#%patch11 -p1 -b .multilink
-%patch12 -p1 -b .i18n
-%patch13 -p1
+%patch13 -p1 -b .nolibnsl
 %patch14 -p1 -b .lfs
 
 %build
@@ -92,8 +86,12 @@ fi
 %{_mandir}/man*/*
 
 %{_infodir}/*.info*
+%{_datadir}/locale/*
 
 %changelog
+* Mon Nov 08 2004 Peter Vrabec <pvrabec@redhat.com>
+- update to 2.5.9
+
 * Mon Nov 01 2004 Peter Vrabec <pvrabec@redhat.com>
 - support large files > 2GB (#105617)
 
