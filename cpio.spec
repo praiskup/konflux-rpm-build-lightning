@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.5
-Release: 3
+Release: 5
 License: GPL
 Group: Applications/Archiving
 URL: ftp://ftp.gnu.org/pub/gnu/cpio/
@@ -15,6 +15,7 @@ Patch0: cpio-2.5-rh.patch
 Patch10: cpio-2.4.2-freebsd.patch
 Patch11: cpio-2.4.2-bug56346.patch
 Patch12: cpio-2.5-i18n-0.1.patch
+Patch13: cpio-2.5-nolibnsl.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -43,6 +44,7 @@ Install cpio if you need a program to manage file archives.
 #%patch10 -p1 -b .fbsd
 #%patch11 -p1 -b .multilink
 %patch12 -p1 -b .i18n
+%patch13 -p1
 
 %build
 
@@ -90,6 +92,12 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue Sep 23 2003 Florian La Roche <Florian.LaRoche@redhat.de>
+- do not link against -lnsl
+
+* Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
 * Fri Feb 14 2003 Jeff Johnson <jbj@redhat.com> 2.5-3
 - setlocale for i18n compliance (#79136).
 
