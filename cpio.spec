@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.5
-Release: 9
+Release: 10
 License: GPL
 Group: Applications/Archiving
 URL: ftp://ftp.gnu.org/pub/gnu/cpio/
@@ -17,6 +17,7 @@ Patch11: cpio-2.4.2-bug56346.patch
 Patch12: cpio-2.5-i18n-0.1.patch
 Patch13: cpio-2.5-nolibnsl.patch
 Patch14: cpio-2.5-lfs.patch
+Patch15: cpio-2.5-time.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -47,6 +48,7 @@ Install cpio if you need a program to manage file archives.
 %patch12 -p1 -b .i18n
 %patch13 -p1
 %patch14 -p1 -b .lfs
+%patch15 -p1 -b .time
 
 %build
 
@@ -94,6 +96,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue Nov 09 2004 Peter Vrabec <pvrabec@redhat.com>
+- fixed "cpio -oH ustar (or tar) saves bad mtime date after Jan 10 2004" (#114580)
+
 * Mon Nov 01 2004 Peter Vrabec <pvrabec@redhat.com>
 - support large files > 2GB (#105617)
 
