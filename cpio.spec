@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 5
+Release: 6
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -16,6 +16,7 @@ Patch13: cpio-2.5-nolibnsl.patch
 Patch14: cpio-2.6-lfs.patch
 Patch16: cpio-2.6-lstat.patch
 Patch17: cpio-2.6-umask.patch
+Patch18: cpio-2.6-chmodRaceC.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -45,6 +46,7 @@ Install cpio if you need a program to manage file archives.
 %patch14 -p1 -b .lfs
 %patch16 -p1 -b .lstat
 %patch17 -p1 -b .umask
+%patch18 -p1 -b .chmodRaceC
 
 autoheader
 
@@ -57,6 +59,7 @@ make
 rm -rf ${RPM_BUILD_ROOT}
 
 %makeinstall
+%find_lang %{name}
 
 { cd ${RPM_BUILD_ROOT}
 
@@ -81,8 +84,8 @@ if [ $1 = 0 ]; then
     /sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir
 fi
 
-%files
-%defattr(-,root,root)
+%files -f %{name}.lang
+%defattr(-,root,root,0755)
 %doc AUTHORS ChangeLog NEWS README THANKS TODO
 
 %ifnos linux
@@ -92,9 +95,12 @@ fi
 %{_mandir}/man*/*
 
 %{_infodir}/*.info*
-%{_datadir}/locale/*
 
 %changelog
+* Mon Apr 25 2005 Peter Vrabec <pvrabec@redhat.com> 2.6-6
+- fix race condition (#155749)
+- use find_lang macro
+
 * Thu Mar 17 2005 Peter Vrabec <pvrabec@redhat.com>
 - rebuild 2.6-5
 
