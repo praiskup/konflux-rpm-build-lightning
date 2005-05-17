@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 6
+Release: 7
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -17,6 +17,8 @@ Patch14: cpio-2.6-lfs.patch
 Patch16: cpio-2.6-lstat.patch
 Patch17: cpio-2.6-umask.patch
 Patch18: cpio-2.6-chmodRaceC.patch
+Patch19: cpio-2.6-dirTraversal.patch
+Patch20: cpio-2.6-warnings.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -47,6 +49,8 @@ Install cpio if you need a program to manage file archives.
 %patch16 -p1 -b .lstat
 %patch17 -p1 -b .umask
 %patch18 -p1 -b .chmodRaceC
+%patch19 -p1 -b .dirTraversal
+%patch20 -p1 -b .warnings
 
 autoheader
 
@@ -97,6 +101,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue May 17 2005 Peter Vrabec <pvrabec@redhat.com> 2.6-7
+- fix #156314 (CAN-2005-1229) cpio directory traversal issue
+- fix some gcc warnings
+
 * Mon Apr 25 2005 Peter Vrabec <pvrabec@redhat.com> 2.6-6
 - fix race condition (#155749)
 - use find_lang macro
