@@ -1,18 +1,34 @@
---- cpio-2.6/src/copyin.c.chmodRaceC	2005-04-25 13:19:34.079310381 +0200
-+++ cpio-2.6/src/copyin.c	2005-04-25 14:09:32.514889697 +0200
-@@ -389,19 +389,26 @@
+--- cpio-2.6/src/copyin.c.chmodRaceC	2005-07-01 14:23:04.000000000 +0200
++++ cpio-2.6/src/copyin.c	2005-07-01 14:46:34.000000000 +0200
+@@ -184,11 +184,12 @@
+ 
+ static int
+ try_existing_file(struct new_cpio_header* file_hdr, int in_file_des,
+-		  int *existing_dir)
++		  int *existing_dir, mode_t *existing_mode)
+ {
+   struct stat file_stat;
+ 
+   *existing_dir = false;
++  *existing_mode = 0;
+   if (lstat (file_hdr->c_name, &file_stat) == 0)
+     {
+       if (S_ISDIR (file_stat.st_mode)
+@@ -198,6 +199,7 @@
+ 	     we are trying to create, don't complain about
+ 	     it.  */
+ 	  *existing_dir = true;
++	  *existing_mode = file_stat.st_mode;
+ 	  return 0;
+ 	}
+       else if (!unconditional_flag
+@@ -389,19 +391,20 @@
  	  continue;
  	}
  
 -      if (close (out_file_des) < 0)
 -	error (0, errno, "%s", d->header.c_name);
 -
-+      /*
-+       *  Avoid race condition.
-+       *  Set chown and chmod before closing the file desc.
-+       *  pvrabec@redhat.com
-+       */
-+       
        /* File is now copied; set attributes.  */
        if (!no_chown_flag)
 -	if ((chown (d->header.c_name,
@@ -24,25 +40,19 @@
        /* chown may have turned off some permissions we wanted. */
 -      if (chmod (d->header.c_name, (int) d->header.c_mode) < 0)
 +      if (fchmod (out_file_des, (int) d->header.c_mode) < 0)
-+	error (0, errno, "%s", d->header.c_name);
+ 	error (0, errno, "%s", d->header.c_name);
 +
 +      if (close (out_file_des) < 0)
- 	error (0, errno, "%s", d->header.c_name);
++	error (0, errno, "%s", d->header.c_name);
 +
        if (retain_time_flag)
  	{
  	  times.actime = times.modtime = d->header.c_mtime;
-@@ -557,6 +564,25 @@
+@@ -557,6 +560,19 @@
        write (out_file_des, "", 1);
        delayed_seek_count = 0;
      }
 +    
-+  /*
-+   *  Avoid race condition.
-+   *  Set chown and chmod before closing the file desc.
-+   *  pvrabec@redhat.com
-+   */
-+   
 +  /* File is now copied; set attributes.  */
 +  if (!no_chown_flag)
 +    if ((fchown (out_file_des,
@@ -58,7 +68,7 @@
    if (close (out_file_des) < 0)
      error (0, errno, "%s", file_hdr->c_name);
  
-@@ -567,18 +593,6 @@
+@@ -567,18 +583,6 @@
  	       file_hdr->c_name, crc, file_hdr->c_chksum);
      }
  
@@ -77,7 +87,7 @@
    if (retain_time_flag)
      {
        struct utimbuf times;		/* For setting file times.  */
-@@ -589,7 +603,7 @@
+@@ -589,7 +593,7 @@
        if (utime (file_hdr->c_name, &times) < 0)
  	error (0, errno, "%s", file_hdr->c_name);
      }
@@ -86,8 +96,81 @@
    tape_skip_padding (in_file_des, file_hdr->c_filesize);
    if (file_hdr->c_nlink > 1
        && (archive_format == arf_newascii || archive_format == arf_crcascii) )
+@@ -603,7 +607,7 @@
+ }
+ 
+ static void
+-copyin_directory(struct new_cpio_header* file_hdr, int existing_dir)
++copyin_directory(struct new_cpio_header* file_hdr, int existing_dir, mode_t existing_mode)
+ {
+   int res;			/* Result of various function calls.  */
+ #ifdef HPUX_CDF
+@@ -646,14 +650,23 @@
+ 	  cdf_flag = 1;
+ 	}
+ #endif
+-      res = mkdir (file_hdr->c_name, file_hdr->c_mode);
++      res = mkdir (file_hdr->c_name, file_hdr->c_mode & ~077);
+     }
+-  else
+-    res = 0;
++  else 
++    {
++      if (!no_chown_flag && (existing_mode & 077) != 0
++         && chmod (file_hdr->c_name, existing_mode & 07700) < 0)
++       {
++         error (0, errno, "%s: chmod", file_hdr->c_name);
++         return;
++       }
++      res = 0;
++    }
++
+   if (res < 0 && create_dir_flag)
+     {
+       create_all_directories (file_hdr->c_name);
+-      res = mkdir (file_hdr->c_name, file_hdr->c_mode);
++      res = mkdir (file_hdr->c_name, file_hdr->c_mode & ~077);
+     }
+   if (res < 0)
+     {
+@@ -742,12 +755,12 @@
+       return;
+     }
+   
+-  res = mknod (file_hdr->c_name, file_hdr->c_mode,
++  res = mknod (file_hdr->c_name, file_hdr->c_mode & ~077,
+ 	    makedev (file_hdr->c_rdev_maj, file_hdr->c_rdev_min));
+   if (res < 0 && create_dir_flag)
+     {
+       create_all_directories (file_hdr->c_name);
+-      res = mknod (file_hdr->c_name, file_hdr->c_mode,
++      res = mknod (file_hdr->c_name, file_hdr->c_mode & ~077,
+ 	    makedev (file_hdr->c_rdev_maj, file_hdr->c_rdev_min));
+     }
+   if (res < 0)
+@@ -826,9 +839,10 @@
+ copyin_file (struct new_cpio_header* file_hdr, int in_file_des)
+ {
+   int existing_dir;
++  mode_t existing_mode;
+ 
+   if (!to_stdout_option
+-      && try_existing_file (file_hdr, in_file_des, &existing_dir) < 0)
++      && try_existing_file (file_hdr, in_file_des, &existing_dir, &existing_mode) < 0)
+     return;
+ 
+   /* Do the real copy or link.  */
+@@ -839,7 +853,7 @@
+       break;
+ 
+     case CP_IFDIR:
+-      copyin_directory(file_hdr, existing_dir);
++      copyin_directory(file_hdr, existing_dir, existing_mode);
+       break;
+ 
+     case CP_IFCHR:
 --- cpio-2.6/src/copypass.c.chmodRaceC	2004-09-06 14:09:04.000000000 +0200
-+++ cpio-2.6/src/copypass.c	2005-04-25 14:09:38.135076926 +0200
++++ cpio-2.6/src/copypass.c	2005-07-01 14:50:46.000000000 +0200
 @@ -181,19 +181,25 @@
  		}
  	      if (close (in_file_des) < 0)
@@ -111,11 +194,54 @@
  	      /* chown may have turned off some permissions we wanted. */
 -	      if (chmod (output_name.ds_string, in_file_stat.st_mode) < 0)
 +	      if (fchmod (out_file_des, in_file_stat.st_mode) < 0)
-+		error (0, errno, "%s", output_name.ds_string);
+ 		error (0, errno, "%s", output_name.ds_string);
 +		
 +	      if (close (out_file_des) < 0)
- 		error (0, errno, "%s", output_name.ds_string);
++		error (0, errno, "%s", output_name.ds_string);
 +
  	      if (reset_time_flag)
  		{
  		  times.actime = in_file_stat.st_atime;
+@@ -240,15 +246,24 @@
+ 		  cdf_flag = 1;
+ 		}
+ #endif
+-	      res = mkdir (output_name.ds_string, in_file_stat.st_mode);
++	      res = mkdir (output_name.ds_string, in_file_stat.st_mode & ~077);
+ 
+ 	    }
+ 	  else
+-	    res = 0;
++            {
++              if (!no_chown_flag && (out_file_stat.st_mode & 077) != 0
++                  && chmod (output_name.ds_string, out_file_stat.st_mode & 07700) < 0)
++                {
++                  error (0, errno, "%s: chmod", output_name.ds_string);
++                  continue;
++                }
++              res = 0;
++            }
++
+ 	  if (res < 0 && create_dir_flag)
+ 	    {
+ 	      create_all_directories (output_name.ds_string);
+-	      res = mkdir (output_name.ds_string, in_file_stat.st_mode);
++	      res = mkdir (output_name.ds_string, in_file_stat.st_mode & ~077);
+ 	    }
+ 	  if (res < 0)
+ 	    {
+@@ -311,12 +326,12 @@
+ 
+ 	  if (link_res < 0)
+ 	    {
+-	      res = mknod (output_name.ds_string, in_file_stat.st_mode,
++	      res = mknod (output_name.ds_string, in_file_stat.st_mode & ~077,
+ 			   in_file_stat.st_rdev);
+ 	      if (res < 0 && create_dir_flag)
+ 		{
+ 		  create_all_directories (output_name.ds_string);
+-		  res = mknod (output_name.ds_string, in_file_stat.st_mode,
++		  res = mknod (output_name.ds_string, in_file_stat.st_mode & ~077,
+ 			       in_file_stat.st_rdev);
+ 		}
+ 	      if (res < 0)

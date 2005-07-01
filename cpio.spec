@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 7
+Release: 8
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -101,6 +101,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Fri Jul 01 2005 Peter Vrabec <pvrabec@redhat.com> 2.6-8
+- fix large file support, archive >4GiB, archive members <4GiB (#160056)
+- fix race condition holes, use mode 0700 for dir creation
+
 * Tue May 17 2005 Peter Vrabec <pvrabec@redhat.com> 2.6-7
 - fix #156314 (CAN-2005-1229) cpio directory traversal issue
 - fix some gcc warnings
