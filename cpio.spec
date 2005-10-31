@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 8
+Release: 9
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -19,6 +19,7 @@ Patch17: cpio-2.6-umask.patch
 Patch18: cpio-2.6-chmodRaceC.patch
 Patch19: cpio-2.6-dirTraversal.patch
 Patch20: cpio-2.6-warnings.patch
+Patch21: cpio-2.6-checksum.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -51,6 +52,7 @@ Install cpio if you need a program to manage file archives.
 %patch18 -p1 -b .chmodRaceC
 %patch19 -p1 -b .dirTraversal
 %patch20 -p1 -b .warnings
+%patch21 -p1 -b .checksum
 
 autoheader
 
@@ -101,6 +103,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon Oct 31 2005 Peter Vrabec <pvrabec@redhat.com> 2.6-9
+- fix checksum error on 64-bit machines (#171649)
+
 * Fri Jul 01 2005 Peter Vrabec <pvrabec@redhat.com> 2.6-8
 - fix large file support, archive >4GiB, archive members <4GiB (#160056)
 - fix race condition holes, use mode 0700 for dir creation
