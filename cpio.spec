@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 9
+Release: 10
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -20,6 +20,7 @@ Patch18: cpio-2.6-chmodRaceC.patch
 Patch19: cpio-2.6-dirTraversal.patch
 Patch20: cpio-2.6-warnings.patch
 Patch21: cpio-2.6-checksum.patch
+Patch22: cpio-2.6-writeOutHeaderBufferOverflow.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -53,6 +54,7 @@ Install cpio if you need a program to manage file archives.
 %patch19 -p1 -b .dirTraversal
 %patch20 -p1 -b .warnings
 %patch21 -p1 -b .checksum
+%patch22 -p1 -b .bufferOverflow
 
 autoheader
 
@@ -103,6 +105,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Wed Nov 23 2005 Peter Vrabec <pvrabec@redhat.com> 2.6-10
+- write_out_header rewritten to fix buffer overflow(#172669)
+
 * Mon Oct 31 2005 Peter Vrabec <pvrabec@redhat.com> 2.6-9
 - fix checksum error on 64-bit machines (#171649)
 
