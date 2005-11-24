@@ -1,16 +1,5 @@
---- cpio-2.6/src/extern.h.backup	2005-11-15 13:30:46.000000000 -0500
-+++ cpio-2.6/src/extern.h	2005-11-15 13:31:12.000000000 -0500
-@@ -112,7 +112,7 @@
- void print_name_with_quoting P_((char *p));
- 
- /* copyout.c */
--void write_out_header P_((struct new_cpio_header *file_hdr, int out_des));
-+int write_out_header P_((struct new_cpio_header *file_hdr, int out_des));
- void process_copy_out P_((void));
- 
- /* copypass.c */
---- cpio-2.6/src/copyout.c.backup	2005-11-15 11:26:24.000000000 -0500
-+++ cpio-2.6/src/copyout.c	2005-11-15 13:24:36.000000000 -0500
+--- cpio-2.6/src/copyout.c.bufferOverflow	2005-11-23 16:51:56.000000000 -0500
++++ cpio-2.6/src/copyout.c	2005-11-23 17:00:38.000000000 -0500
 @@ -159,7 +159,7 @@
  }
  
@@ -82,8 +71,7 @@
 +to_ascii_or_warn (char *where, uintmax_t n, size_t digits,
 +		  unsigned logbase,
 +		  const char *filename, const char *fieldname)
- {
--  if (archive_format == arf_newascii || archive_format == arf_crcascii)
++{
 +  if (to_ascii (where, n, digits, logbase))
 +    field_width_warning (filename, fieldname);
 +}    
@@ -92,7 +80,8 @@
 +to_ascii_or_error (char *where, uintmax_t n, size_t digits,
 +		   unsigned logbase,
 +		   const char *filename, const char *fieldname)
-+{
+ {
+-  if (archive_format == arf_newascii || archive_format == arf_crcascii)
 +  if (to_ascii (where, n, digits, logbase))
      {
 -      char ascii_header[112];
@@ -487,18 +476,17 @@
  	  /* Copy the named file to the output.  */
  	  switch (file_hdr.c_mode & CP_IFMT)
  	    {
-@@ -613,8 +766,8 @@
+@@ -613,7 +766,8 @@
  						    file_hdr.c_dev_min)))
  		    {
  		      file_hdr.c_tar_linkname = otherfile;
 -		      write_out_header (&file_hdr, out_file_des);
--		      break;
 +		      if (write_out_header (&file_hdr, out_file_des))
 +			continue;
+ 		      break;
  		    }
  		}
- 	      if ( (archive_format == arf_newascii || archive_format == arf_crcascii)
-@@ -643,7 +796,8 @@
+@@ -643,7 +797,8 @@
  						       file_hdr.c_filesize,
  						       input_name.ds_string);
  
@@ -508,7 +496,7 @@
  	      copy_files_disk_to_tape (in_file_des, out_file_des, file_hdr.c_filesize, input_name.ds_string);
  	      warn_if_file_changed(input_name.ds_string, file_hdr.c_filesize,
                                     file_hdr.c_mtime);
-@@ -673,7 +827,8 @@
+@@ -673,7 +828,8 @@
  
  	    case CP_IFDIR:
  	      file_hdr.c_filesize = 0;
@@ -518,7 +506,7 @@
  	      break;
  
  	    case CP_IFCHR:
-@@ -702,14 +857,16 @@
+@@ -702,14 +858,16 @@
  		      file_hdr.c_mode = (file_stat.st_mode & 07777);
  		      file_hdr.c_mode |= CP_IFREG;
  		      file_hdr.c_tar_linkname = otherfile;
@@ -537,7 +525,7 @@
  	      break;
  
  #ifdef CP_IFLNK
-@@ -738,12 +895,14 @@
+@@ -738,12 +896,14 @@
  		      {
  			link_name[link_size] = '\0';
  			file_hdr.c_tar_linkname = link_name;
@@ -554,3 +542,14 @@
  		    tape_buffered_write (link_name, out_file_des, link_size);
  		    tape_pad_output (out_file_des, link_size);
  		  }
+--- cpio-2.6/src/extern.h.bufferOverflow	2005-11-23 16:51:56.000000000 -0500
++++ cpio-2.6/src/extern.h	2005-11-23 16:51:56.000000000 -0500
+@@ -112,7 +112,7 @@
+ void print_name_with_quoting P_((char *p));
+ 
+ /* copyout.c */
+-void write_out_header P_((struct new_cpio_header *file_hdr, int out_des));
++int write_out_header P_((struct new_cpio_header *file_hdr, int out_des));
+ void process_copy_out P_((void));
+ 
+ /* copypass.c */

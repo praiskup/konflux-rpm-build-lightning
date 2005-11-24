@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 10
+Release: 11
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -105,6 +105,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Wed Nov 23 2005 Peter Vrabec <pvrabec@redhat.com> 2.6-11
+- fix previous patch(writeOutHeaderBufferOverflow)
+
 * Wed Nov 23 2005 Peter Vrabec <pvrabec@redhat.com> 2.6-10
 - write_out_header rewritten to fix buffer overflow(#172669)
 
