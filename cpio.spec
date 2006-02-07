@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 11.1
+Release: 11.2
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -105,6 +105,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue Feb 07 2006 Jesse Keating <jkeating@redhat.com> - 2.6-11.2
+- rebuilt for new gcc4.1 snapshot and glibc changes
+
 * Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
 - rebuilt
 
