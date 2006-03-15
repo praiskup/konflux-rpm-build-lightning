@@ -55,7 +55,7 @@
 +static void
 +field_width_error (const char *filename, const char *fieldname)
 +{
-+  error (0, 0, _("%s: field width not sufficient for storing %s"),
++  error (1, 0, _("%s: field width not sufficient for storing %s"),
 +	 filename, fieldname);
 +}
 +

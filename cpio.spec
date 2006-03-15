@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 12
+Release: 13
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -21,8 +21,6 @@ Patch19: cpio-2.6-dirTraversal.patch
 Patch20: cpio-2.6-warnings.patch
 Patch21: cpio-2.6-checksum.patch
 Patch22: cpio-2.6-writeOutHeaderBufferOverflow.patch
-Patch23: cpio-2.6-largeFileGrew.patch
-Patch24: cpio-2.6-toAsciiError.patch
 %ifnos linux
 Prereq: /sbin/rmt
 %endif
@@ -56,8 +54,6 @@ Install cpio if you need a program to manage file archives.
 %patch20 -p1 -b .warnings
 %patch21 -p1 -b .checksum
 %patch22 -p1 -b .bufferOverflow
-%patch23 -p1 -b .largeFileGrew
-%patch24 -p1 -b .toAsciiError
 autoheader
 
 %build
@@ -107,6 +103,13 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Wed Mar 15 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-13
+- merge toAsciiError.patch with writeOutHeaderBufferOverflow.patch
+- merge largeFileGrew.patch with lfs.patch
+- fix large file support, cpio is able to store files<8GB 
+  in 'old ascii' format (-H odc option)
+- adjust warnings.patch
+
 * Tue Mar 14 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-12
 - fix warn_if_file_changed() and set exit code to #1 when 
   cpio fails to store file > 4GB (#183224)
