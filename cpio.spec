@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 14
+Release: 15
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -106,6 +106,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Sat Mar 25 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-15
+- fix (#186339) on ppc and s390
+
 * Thu Mar 23 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-14
 - init struct  file_hdr (#186339)
 
