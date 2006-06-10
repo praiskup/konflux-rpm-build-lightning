@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 17
+Release: 18
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -27,7 +27,7 @@ Patch23: cpio-2.6-initHeaderStruct.patch
 Prereq: /sbin/rmt
 %endif
 Prereq: /sbin/install-info
-BuildRequires: texinfo
+BuildRequires: texinfo, autoconf
 Buildroot: %{_tmppath}/%{name}-root
 
 %description
@@ -106,6 +106,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Sat Jun 10 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-18
+- autoconf was added to BuildRequires, because autoheader is 
+  used in prep phase (#194737)
+
 * Tue Mar 28 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-17
 - rebuild
 
