@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 18.1
+Release: 19
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -106,6 +106,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue Jul 18 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-19
+- fix cpio --help output (#197597)
+
 * Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 2.6-18.1
 - rebuild
 
