@@ -6,11 +6,12 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 19
+Release: 20%{?dist}
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.gz
+Source1: cpio.1
 Patch0: cpio-2.6-rh.patch
 Patch13: cpio-2.5-nolibnsl.patch
 Patch14: cpio-2.6-lfs.patch
@@ -68,6 +69,8 @@ make
 rm -rf ${RPM_BUILD_ROOT}
 
 %makeinstall
+install -c -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
+
 %find_lang %{name}
 
 { cd ${RPM_BUILD_ROOT}
@@ -106,6 +109,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Sat Nov 25 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-20
+- cpio man page provided by RedHat
+
 * Tue Jul 18 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-19
 - fix cpio --help output (#197597)
 
