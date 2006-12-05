@@ -6,7 +6,7 @@
 Summary: A GNU archiving program.
 Name: cpio
 Version: 2.6
-Release: 20%{?dist}
+Release: 21%{?dist}
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -23,6 +23,7 @@ Patch20: cpio-2.6-warnings.patch
 Patch21: cpio-2.6-checksum.patch
 Patch22: cpio-2.6-writeOutHeaderBufferOverflow.patch
 Patch23: cpio-2.6-initHeaderStruct.patch
+Patch24: cpio-2.6-setLocale.patch
 
 %ifnos linux
 Prereq: /sbin/rmt
@@ -58,6 +59,8 @@ Install cpio if you need a program to manage file archives.
 %patch21 -p1 -b .checksum
 %patch22 -p1 -b .bufferOverflow
 %patch23 -p1 -b .initHeaderStruct
+%patch24 -p1 -b .setLocale.patch
+
 autoheader
 
 %build
@@ -109,6 +112,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue Dec 05 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-21
+- fix setlocale (#200478)
+
 * Sat Nov 25 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-20
 - cpio man page provided by RedHat
 
