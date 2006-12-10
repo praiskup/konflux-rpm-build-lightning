@@ -3,10 +3,10 @@
 %{?this_os_is_linux:%define	_bindir		/bin}
 %{?this_os_is_linux:%define	_libexecdir	/sbin}
 
-Summary: A GNU archiving program.
+Summary: A GNU archiving program
 Name: cpio
 Version: 2.6
-Release: 21%{?dist}
+Release: 22%{?dist}
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -112,6 +112,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Sun Dec 10 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-22
+- fix rpmlint issue in spec file
+
 * Tue Dec 05 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-21
 - fix setlocale (#200478)
 
