@@ -112,7 +112,7 @@ fi
 %{_infodir}/*.info*
 
 %changelog
-- Mon Jan 22 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-23
+* Mon Jan 22 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-23
 - fix non-failsafe install-info use in scriptlets (#223682)
 
 * Sun Dec 10 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-22
