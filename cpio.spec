@@ -6,7 +6,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.6
-Release: 22%{?dist}
+Release: 23%{?dist}
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -92,11 +92,11 @@ install -c -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
 rm -rf ${RPM_BUILD_ROOT}
 
 %post
-/sbin/install-info %{_infodir}/cpio.info.gz %{_infodir}/dir
+/sbin/install-info %{_infodir}/cpio.info.gz %{_infodir}/dir || :
 
 %preun
 if [ $1 = 0 ]; then
-    /sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir
+    /sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
 fi
 
 %files -f %{name}.lang
@@ -112,6 +112,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+- Mon Jan 22 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-23
+- fix non-failsafe install-info use in scriptlets (#223682)
+
 * Sun Dec 10 2006 Peter Vrabec <pvrabec@redhat.com> 2.6-22
 - fix rpmlint issue in spec file
 
