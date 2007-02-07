@@ -1,12 +1,7 @@
-# XXX generate per-os macro to test
-%{expand: %%global this_os_is_%{_os} %%{nil}}
-%{?this_os_is_linux:%define	_bindir		/bin}
-%{?this_os_is_linux:%define	_libexecdir	/sbin}
-
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.6
-Release: 23%{?dist}
+Release: 24%{?dist}
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -24,13 +19,10 @@ Patch21: cpio-2.6-checksum.patch
 Patch22: cpio-2.6-writeOutHeaderBufferOverflow.patch
 Patch23: cpio-2.6-initHeaderStruct.patch
 Patch24: cpio-2.6-setLocale.patch
-
-%ifnos linux
-Prereq: /sbin/rmt
-%endif
-Prereq: /sbin/install-info
-BuildRequires: texinfo, autoconf
-Buildroot: %{_tmppath}/%{name}-root
+Requires(post): /sbin/install-info
+Requires(preun): /sbin/install-info
+BuildRequires: texinfo, autoconf, gettext
+Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
 GNU cpio copies files into or out of a cpio or tar archive.  Archives
@@ -66,27 +58,20 @@ autoheader
 %build
 
 CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -Wall" %configure
-make
+make %{?_smp_mflags}
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-%makeinstall
-install -c -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
+make DESTDIR=$RPM_BUILD_ROOT install
+install -c -p -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
+
+
+rm $RPM_BUILD_ROOT/%{_mandir}/man1/mt.1*
+rm $RPM_BUILD_ROOT/%{_infodir}/dir
+rm $RPM_BUILD_ROOT/%{_libexecdir}/rmt
 
 %find_lang %{name}
-
-{ cd ${RPM_BUILD_ROOT}
-
-%ifos linux
-# XXX these from mt-st
-  rm -f .%{_bindir}/mt .%{_mandir}/man1/mt.1
-%endif
-
-# XXX Nuke unpackaged files.
-  rm -f .%{_infodir}/dir
-  rm -f ./sbin/rmt
-}
 
 %clean
 rm -rf ${RPM_BUILD_ROOT}
@@ -96,22 +81,20 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %preun
 if [ $1 = 0 ]; then
-    /sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
+	/sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
 fi
 
 %files -f %{name}.lang
 %defattr(-,root,root,0755)
-%doc AUTHORS ChangeLog NEWS README THANKS TODO
-
-%ifnos linux
-%{_libexecdir}/*
-%endif
+%doc AUTHORS ChangeLog NEWS README THANKS TODO COPYING
 %{_bindir}/*
 %{_mandir}/man*/*
-
 %{_infodir}/*.info*
 
 %changelog
+* Mon Jan 22 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-24
+- fix spec file to meet Fedora standards (#225656) 
+
 * Mon Jan 22 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-23
 - fix non-failsafe install-info use in scriptlets (#223682)
 
