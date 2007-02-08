@@ -1,24 +1,26 @@
+%define _bindir         /bin
+
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.6
-Release: 24%{?dist}
+Release: 25%{?dist}
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.gz
-Source1: cpio.1
+Source1:cpio.1
 Patch0: cpio-2.6-rh.patch
-Patch13: cpio-2.5-nolibnsl.patch
-Patch14: cpio-2.6-lfs.patch
-Patch16: cpio-2.6-lstat.patch
-Patch17: cpio-2.6-umask.patch
-Patch18: cpio-2.6-chmodRaceC.patch
-Patch19: cpio-2.6-dirTraversal.patch
-Patch20: cpio-2.6-warnings.patch
-Patch21: cpio-2.6-checksum.patch
-Patch22: cpio-2.6-writeOutHeaderBufferOverflow.patch
-Patch23: cpio-2.6-initHeaderStruct.patch
-Patch24: cpio-2.6-setLocale.patch
+Patch1: cpio-2.5-nolibnsl.patch
+Patch2: cpio-2.6-lfs.patch
+Patch3: cpio-2.6-lstat.patch
+Patch4: cpio-2.6-umask.patch
+Patch5: cpio-2.6-chmodRaceC.patch
+Patch6: cpio-2.6-dirTraversal.patch
+Patch7: cpio-2.6-warnings.patch
+Patch8: cpio-2.6-checksum.patch
+Patch9: cpio-2.6-writeOutHeaderBufferOverflow.patch
+Patch10:cpio-2.6-initHeaderStruct.patch
+Patch11:cpio-2.6-setLocale.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 BuildRequires: texinfo, autoconf, gettext
@@ -40,18 +42,18 @@ Install cpio if you need a program to manage file archives.
 
 %prep
 %setup -q
-%patch0 -p1 -b .rh
-%patch13 -p1 -b .nolibnsl
-%patch14 -p1 -b .lfs
-%patch16 -p1 -b .lstat
-%patch17 -p1 -b .umask
-%patch18 -p1 -b .chmodRaceC
-%patch19 -p1 -b .dirTraversal
-%patch20 -p1 -b .warnings
-%patch21 -p1 -b .checksum
-%patch22 -p1 -b .bufferOverflow
-%patch23 -p1 -b .initHeaderStruct
-%patch24 -p1 -b .setLocale.patch
+%patch0  -p1 -b .rh
+%patch1  -p1 -b .nolibnsl
+%patch2  -p1 -b .lfs
+%patch3  -p1 -b .lstat
+%patch4  -p1 -b .umask
+%patch5  -p1 -b .chmodRaceC
+%patch6  -p1 -b .dirTraversal
+%patch7  -p1 -b .warnings
+%patch8  -p1 -b .checksum
+%patch9  -p1 -b .bufferOverflow
+%patch10 -p1 -b .initHeaderStruct
+%patch11 -p1 -b .setLocale.patch
 
 autoheader
 
@@ -92,7 +94,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
-* Mon Jan 22 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-24
+* Thu Feb 08 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-25
+- set cpio bindir properly
+
+* Wed Feb 07 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-24
 - fix spec file to meet Fedora standards (#225656) 
 
 * Mon Jan 22 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-23
