@@ -1,9 +1,9 @@
-%define _bindir         /bin
+%define _bindir /bin
 
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.6
-Release: 25%{?dist}
+Release: 26%{?dist}
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -65,8 +65,7 @@ make %{?_smp_mflags}
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-make DESTDIR=$RPM_BUILD_ROOT install
-install -c -p -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
+make DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p" install
 
 
 rm $RPM_BUILD_ROOT/%{_mandir}/man1/mt.1*
@@ -94,6 +93,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Thu Feb 08 2007 Ruben Kerkhof <ruben@rubenkerkhof.com> 2.6.26
+- Preserve timestamps when installing files
+
 * Thu Feb 08 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-25
 - set cpio bindir properly
 
