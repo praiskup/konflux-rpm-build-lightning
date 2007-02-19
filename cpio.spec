@@ -93,7 +93,7 @@ fi
 %{_infodir}/*.info*
 
 %changelog
-* Thu Feb 08 2007 Ruben Kerkhof <ruben@rubenkerkhof.com> 2.6.26
+* Thu Feb 08 2007 Ruben Kerkhof <ruben@rubenkerkhof.com> 2.6-26
 - Preserve timestamps when installing files
 
 * Thu Feb 08 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-25
