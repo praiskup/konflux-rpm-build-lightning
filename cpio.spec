@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.6
-Release: 26%{?dist}
+Release: 27%{?dist}
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -93,6 +93,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue Feb 20 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-27
+- fix typo in changelog
+
 * Thu Feb 08 2007 Ruben Kerkhof <ruben@rubenkerkhof.com> 2.6-26
 - Preserve timestamps when installing files
 
