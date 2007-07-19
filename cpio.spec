@@ -2,25 +2,17 @@
 
 Summary: A GNU archiving program
 Name: cpio
-Version: 2.6
-Release: 27%{?dist}
+Version: 2.9
+Release: 1%{?dist}
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.gz
-Source1:cpio.1
-Patch0: cpio-2.6-rh.patch
-Patch1: cpio-2.5-nolibnsl.patch
-Patch2: cpio-2.6-lfs.patch
-Patch3: cpio-2.6-lstat.patch
-Patch4: cpio-2.6-umask.patch
-Patch5: cpio-2.6-chmodRaceC.patch
-Patch6: cpio-2.6-dirTraversal.patch
-Patch7: cpio-2.6-warnings.patch
-Patch8: cpio-2.6-checksum.patch
-Patch9: cpio-2.6-writeOutHeaderBufferOverflow.patch
-Patch10:cpio-2.6-initHeaderStruct.patch
-Patch11:cpio-2.6-setLocale.patch
+Source1: cpio.1
+Patch1: cpio-2.6-setLocale.patch
+Patch2: cpio-2.9-rh.patch
+Patch3: cpio-2.9-chmodRaceC.patch
+Patch4: cpio-2.9-exitCode.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 BuildRequires: texinfo, autoconf, gettext
@@ -42,18 +34,10 @@ Install cpio if you need a program to manage file archives.
 
 %prep
 %setup -q
-%patch0  -p1 -b .rh
-%patch1  -p1 -b .nolibnsl
-%patch2  -p1 -b .lfs
-%patch3  -p1 -b .lstat
-%patch4  -p1 -b .umask
-%patch5  -p1 -b .chmodRaceC
-%patch6  -p1 -b .dirTraversal
-%patch7  -p1 -b .warnings
-%patch8  -p1 -b .checksum
-%patch9  -p1 -b .bufferOverflow
-%patch10 -p1 -b .initHeaderStruct
-%patch11 -p1 -b .setLocale.patch
+%patch1  -p1 -b .setLocale
+%patch2  -p1 -b .rh
+%patch3  -p1 -b .chmodRaceC
+%patch4  -p1 -b .exitCode
 
 autoheader
 
@@ -68,9 +52,9 @@ rm -rf ${RPM_BUILD_ROOT}
 make DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p" install
 
 
-rm $RPM_BUILD_ROOT/%{_mandir}/man1/mt.1*
-rm $RPM_BUILD_ROOT/%{_infodir}/dir
-rm $RPM_BUILD_ROOT/%{_libexecdir}/rmt
+rm $RPM_BUILD_ROOT%{_libexecdir}/rmt
+rm $RPM_BUILD_ROOT%{_mandir}/man1/*.1*
+install -c -p -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
 
 %find_lang %{name}
 
@@ -93,6 +77,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Thu Jul 19 2007 Radek Brich <rbrich@redhat.com> 2.9-1
+- update to 2.9, GPLv3
+
 * Tue Feb 20 2007 Peter Vrabec <pvrabec@redhat.com> 2.6-27
 - fix typo in changelog
 
