@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.9
-Release: 1%{?dist}
+Release: 1.1%{?dist}
 License: GPL
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -52,8 +52,9 @@ rm -rf ${RPM_BUILD_ROOT}
 make DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p" install
 
 
-rm $RPM_BUILD_ROOT%{_libexecdir}/rmt
-rm $RPM_BUILD_ROOT%{_mandir}/man1/*.1*
+rm -f $RPM_BUILD_ROOT%{_libexecdir}/rmt
+rm -f $RPM_BUILD_ROOT%{_infodir}/dir
+rm -f $RPM_BUILD_ROOT%{_mandir}/man1/*.1*
 install -c -p -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
 
 %find_lang %{name}
@@ -77,6 +78,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Thu Jul 19 2007 Radek Brich <rbrich@redhat.com> 2.9-1.1
+- fix spec, rebuild
+
 * Thu Jul 19 2007 Radek Brich <rbrich@redhat.com> 2.9-1
 - update to 2.9, GPLv3
 
