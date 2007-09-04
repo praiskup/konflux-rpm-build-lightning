@@ -3,8 +3,8 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.9
-Release: 3%{?dist}
-License: GPL
+Release: 4%{?dist}
+License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.gz
@@ -78,6 +78,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue Sep 04 2007 Radek Brich <rbrich@redhat.com> 2.9-4
+- Updated license tag
+
 * Wed Aug 29 2007 Fedora Release Engineering <rel-eng at fedoraproject dot org> - 2.9-3
 - Rebuild for selinux ppc32 issue.
 
