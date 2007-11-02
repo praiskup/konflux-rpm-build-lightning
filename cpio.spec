@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.9
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -13,6 +13,7 @@ Patch1: cpio-2.6-setLocale.patch
 Patch2: cpio-2.9-rh.patch
 Patch3: cpio-2.9-chmodRaceC.patch
 Patch4: cpio-2.9-exitCode.patch
+Patch5: cpio-2.9-safer_name_suffix.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 BuildRequires: texinfo, autoconf, gettext
@@ -38,6 +39,7 @@ Install cpio if you need a program to manage file archives.
 %patch2  -p1 -b .rh
 %patch3  -p1 -b .chmodRaceC
 %patch4  -p1 -b .exitCode
+%patch5  -p1 -b .safer_name_suffix
 
 autoheader
 
@@ -78,6 +80,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Thu Nov 01 2007 Radek Brich <rbrich@redhat.com> 2.9-5
+- upstream patch for CVE-2007-4476 (stack crashing in safer_name_suffix)
+
 * Tue Sep 04 2007 Radek Brich <rbrich@redhat.com> 2.9-4
 - Updated license tag
 
