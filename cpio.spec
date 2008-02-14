@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.9
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -14,6 +14,8 @@ Patch2: cpio-2.9-rh.patch
 Patch3: cpio-2.9-chmodRaceC.patch
 Patch4: cpio-2.9-exitCode.patch
 Patch5: cpio-2.9-safer_name_suffix.patch
+Patch6: cpio-2.9-gcc43.patch
+Patch7: cpio-2.9-dir_perm.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 BuildRequires: texinfo, autoconf, gettext
@@ -40,6 +42,8 @@ Install cpio if you need a program to manage file archives.
 %patch3  -p1 -b .chmodRaceC
 %patch4  -p1 -b .exitCode
 %patch5  -p1 -b .safer_name_suffix
+%patch6  -p1 -b .gcc43
+%patch7  -p1 -b .dir_perm
 
 autoheader
 
@@ -80,6 +84,11 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Thu Feb 14 2008 Radek Brich <rbrich@redhat.com> 2.9-6
+- when extracting archive created with 'find -depth',
+  restore the permissions of directories properly (bz#430835)
+- fix for GCC 4.3
+
 * Thu Nov 01 2007 Radek Brich <rbrich@redhat.com> 2.9-5
 - upstream patch for CVE-2007-4476 (stack crashing in safer_name_suffix)
 
