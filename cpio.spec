@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.9
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -84,6 +84,11 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon Mar 03 2008 Radek Brich <rbrich@redhat.com> 2.9-7
+- fix -dir_perm patch to restore permissions correctly even
+  in passthrough mode -- revert affected code to cpio 2.8 state
+  (bz#430835)
+
 * Thu Feb 14 2008 Radek Brich <rbrich@redhat.com> 2.9-6
 - when extracting archive created with 'find -depth',
   restore the permissions of directories properly (bz#430835)

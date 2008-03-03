@@ -1,101 +1,452 @@
-diff -up cpio-2.9/src/extern.h.orig cpio-2.9/src/extern.h
---- cpio-2.9/src/extern.h.orig	2007-06-28 14:59:38.000000000 +0200
-+++ cpio-2.9/src/extern.h	2008-02-13 15:24:37.000000000 +0100
-@@ -211,7 +211,7 @@ uintmax_t from_ascii (char const *where,
- 	    
- void delay_set_stat (char const *file_name, struct stat *st,
- 		     mode_t invert_permissions);
--void repair_delayed_set_stat (char const *dir,
-+int repair_delayed_set_stat (char const *dir,
- 			      struct stat *dir_stat_info);
- void apply_delayed_set_stat (void);
-      
-diff -up cpio-2.9/src/copyin.c.orig cpio-2.9/src/copyin.c
---- cpio-2.9/src/copyin.c.orig	2007-06-28 12:51:09.000000000 +0200
-+++ cpio-2.9/src/copyin.c	2008-02-14 10:28:33.000000000 +0100
-@@ -570,6 +570,7 @@ static void
- copyin_directory (struct cpio_file_stat *file_hdr, int existing_dir)
- {
-   int res;			/* Result of various function calls.  */
-+  struct stat file_stat;
- #ifdef HPUX_CDF
-   int cdf_flag;                 /* True if file is a CDF.  */
-   int cdf_char;                 /* Index of `+' char indicating a CDF.  */
-@@ -626,7 +627,6 @@ copyin_directory (struct cpio_file_stat 
- 	 create_all_directories(), so the mkdir will fail
- 	 because the directory exists.  If that's the case,
- 	 don't complain about it.  */
--      struct stat file_stat;
-       if (errno != EEXIST)
- 	{
- 	  mkdir_error (file_hdr->c_name);
-@@ -645,7 +645,11 @@ copyin_directory (struct cpio_file_stat 
- 	}
-     }
+Redhat-bugzilla: 430835
+
+* revert make_path code to previous state, which worked better
+* this can be dropped when permission issues are solved in upstream
+
+
+diff -up cpio-2.9/src/extern.h.dir_perm cpio-2.9/src/extern.h
+--- cpio-2.9/src/extern.h.dir_perm	2007-06-28 14:59:38.000000000 +0200
++++ cpio-2.9/src/extern.h	2008-03-03 11:57:43.000000000 +0100
+@@ -140,8 +140,8 @@ void process_args (int argc, char *argv[
+ void initialize_buffers (void);
  
--  set_perms (-1, file_hdr); 
-+  /* if the directory is queued for delayed_set_stat,
-+  fix permissions in the queue, otherwise set the permissions now */
-+  cpio_to_stat(file_hdr, &file_stat);
-+  if (repair_delayed_set_stat(file_hdr->c_name, &file_stat))
-+    set_perms (-1, file_hdr); 
+ /* makepath.c */
+-int make_path (char *argpath, uid_t owner, gid_t group,
+-	       const char *verbose_fmt_string);
++int make_path (char *argpath, int mode, int parent_mode,
++               uid_t owner, gid_t group, char *verbose_fmt_string);
+ 
+ /* tar.c */
+ void write_out_tar_header (struct cpio_file_stat *file_hdr, int out_des);
+diff -up cpio-2.9/src/util.c.dir_perm cpio-2.9/src/util.c
+--- cpio-2.9/src/util.c.dir_perm	2007-06-28 15:04:51.000000000 +0200
++++ cpio-2.9/src/util.c	2008-03-03 11:45:00.000000000 +0100
+@@ -618,14 +618,7 @@ create_all_directories (char *name)
+     error (2, 0, _("virtual memory exhausted"));
+ 
+   if (dir[0] != '.' || dir[1] != '\0')
+-    {
+-      const char *fmt;
+-      if (warn_option & CPIO_WARN_INTERDIR)
+-	fmt = _("Creating intermediate directory `%s'");
+-      else
+-	fmt = NULL;
+-      make_path (dir, -1, -1, fmt);
+-    }
++    make_path (dir, mode, 0700, -1, -1, (char *) NULL);
+ 
+   free (dir);
+ }
+diff -up cpio-2.9/src/copyin.c.dir_perm cpio-2.9/src/copyin.c
+--- cpio-2.9/src/copyin.c.dir_perm	2008-03-03 11:45:00.000000000 +0100
++++ cpio-2.9/src/copyin.c	2008-03-03 11:45:00.000000000 +0100
+@@ -186,12 +186,11 @@ list_file(struct cpio_file_stat* file_hd
+ 
+ static int
+ try_existing_file (struct cpio_file_stat* file_hdr, int in_file_des,
+-		   int *existing_dir, mode_t *existing_mode)
++		   int *existing_dir)
+ {
+   struct stat file_stat;
+ 
+   *existing_dir = false;
+-  *existing_mode = 0;
+   if (lstat (file_hdr->c_name, &file_stat) == 0)
+     {
+       if (S_ISDIR (file_stat.st_mode)
+@@ -201,7 +200,6 @@ try_existing_file (struct cpio_file_stat
+ 	     we are trying to create, don't complain about
+ 	     it.  */
+ 	  *existing_dir = true;
+-	  *existing_mode = file_stat.st_mode;
+ 	  return 0;
+ 	}
+       else if (!unconditional_flag
+@@ -569,7 +567,7 @@ copyin_regular_file (struct cpio_file_st
  }
  
  static void
-diff -up cpio-2.9/src/makepath.c.orig cpio-2.9/src/makepath.c
-diff -up cpio-2.9/src/util.c.orig cpio-2.9/src/util.c
---- cpio-2.9/src/util.c.orig	2007-06-28 15:04:51.000000000 +0200
-+++ cpio-2.9/src/util.c	2008-02-14 13:24:37.000000000 +0100
-@@ -1265,6 +1265,16 @@ stat_to_cpio (struct cpio_file_stat *hdr
-   hdr->c_tar_linkname = NULL;
- }
- 
-+void
-+cpio_to_stat (struct cpio_file_stat *hdr, struct stat *st)
-+{
-+  stat (hdr->c_name, st);
-+  st->st_mode = hdr->c_mode;
-+  st->st_uid = CPIO_UID(hdr->c_uid);
-+  st->st_gid = CPIO_GID(hdr->c_gid);
-+  st->st_mtime = hdr->c_mtime;
-+}
-+
- #ifndef HAVE_FCHOWN
- # define fchown(fd, uid, gid) (-1)
- #endif
-@@ -1389,7 +1399,7 @@ delay_set_stat (char const *file_name, s
-    created within the file name of DIR.  The intermediate directory turned
-    out to be the same as this directory, e.g. due to ".." or symbolic
-    links.  *DIR_STAT_INFO is the status of the directory.  */
--void
-+int
- repair_delayed_set_stat (char const *dir,
- 			 struct stat *dir_stat_info)
+-copyin_directory (struct cpio_file_stat *file_hdr, int existing_dir, mode_t existing_mode)
++copyin_directory (struct cpio_file_stat *file_hdr, int existing_dir)
  {
-@@ -1400,22 +1410,19 @@ repair_delayed_set_stat (char const *dir
-       if (stat (data->stat.c_name, &st) != 0)
+   int res;			/* Result of various function calls.  */
+ #ifdef HPUX_CDF
+@@ -612,22 +610,14 @@ copyin_directory (struct cpio_file_stat 
+ 	  cdf_flag = 1;
+ 	}
+ #endif
+-      res = mkdir (file_hdr->c_name, file_hdr->c_mode & ~077);
++      res = mkdir (file_hdr->c_name, file_hdr->c_mode);
+     }
+   else
+-    {
+-      if (!no_chown_flag && (existing_mode & 077) != 0
+-         && chmod (file_hdr->c_name, existing_mode & 07700) < 0)
+-       {
+-         error (0, errno, "%s: chmod", file_hdr->c_name);
+-         return;
+-       }
+-      res = 0;
+-    }
++    res = 0;
+   if (res < 0 && create_dir_flag)
+     {
+       create_all_directories (file_hdr->c_name);
+-      res = mkdir (file_hdr->c_name, file_hdr->c_mode & ~077);
++      res = mkdir (file_hdr->c_name, file_hdr->c_mode);
+     }
+   if (res < 0)
+     {
+@@ -702,12 +692,12 @@ copyin_device (struct cpio_file_stat* fi
+       return;
+     }
+   
+-  res = mknod (file_hdr->c_name, file_hdr->c_mode & ~077,
++  res = mknod (file_hdr->c_name, file_hdr->c_mode,
+ 	    makedev (file_hdr->c_rdev_maj, file_hdr->c_rdev_min));
+   if (res < 0 && create_dir_flag)
+     {
+       create_all_directories (file_hdr->c_name);
+-      res = mknod (file_hdr->c_name, file_hdr->c_mode & ~077,
++      res = mknod (file_hdr->c_name, file_hdr->c_mode,
+ 	    makedev (file_hdr->c_rdev_maj, file_hdr->c_rdev_min));
+     }
+   if (res < 0)
+@@ -782,10 +772,9 @@ static void
+ copyin_file (struct cpio_file_stat* file_hdr, int in_file_des)
+ {
+   int existing_dir;
+-  mode_t existing_mode;
+ 
+   if (!to_stdout_option
+-      && try_existing_file (file_hdr, in_file_des, &existing_dir, &existing_mode) < 0)
++      && try_existing_file (file_hdr, in_file_des, &existing_dir) < 0)
+     return;
+ 
+   /* Do the real copy or link.  */
+@@ -796,7 +785,7 @@ copyin_file (struct cpio_file_stat* file
+       break;
+ 
+     case CP_IFDIR:
+-      copyin_directory(file_hdr, existing_dir, existing_mode);
++      copyin_directory (file_hdr, existing_dir);
+       break;
+ 
+     case CP_IFCHR:
+@@ -1573,8 +1562,6 @@ process_copy_in ()
+   if (dot_flag)
+     fputc ('\n', stderr);
+ 
+-  apply_delayed_set_stat ();
+-  
+   if (append_flag)
+     return;
+ 
+diff -up cpio-2.9/src/makepath.c.dir_perm cpio-2.9/src/makepath.c
+--- cpio-2.9/src/makepath.c.dir_perm	2007-06-28 15:09:47.000000000 +0200
++++ cpio-2.9/src/makepath.c	2008-03-03 11:45:00.000000000 +0100
+@@ -1,9 +1,9 @@
+ /* makepath.c -- Ensure that a directory path exists.
+-   Copyright (C) 1990, 2006, 2007 Free Software Foundation, Inc.
++   Copyright (C) 1990, 2006 Free Software Foundation, Inc.
+ 
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+-   the Free Software Foundation; either version 3, or (at your option)
++   the Free Software Foundation; either version 2, or (at your option)
+    any later version.
+ 
+    This program is distributed in the hope that it will be useful,
+@@ -29,15 +29,14 @@
+ #include <stdio.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+-#include "cpiohdr.h"
+-#include "dstring.h"
+-#include "extern.h"
+ 
+ /* Ensure that the directory ARGPATH exists.
+    Remove any trailing slashes from ARGPATH before calling this function.
+ 
+-   Make all directory components that don't already exist with
+-   permissions 700.
++   Make any leading directories that don't already exist, with
++   permissions PARENT_MODE.
++   If the last element of ARGPATH does not exist, create it as
++   a new directory with permissions MODE.
+    If OWNER and GROUP are non-negative, make them the UID and GID of
+    created directories.
+    If VERBOSE_FMT_STRING is nonzero, use it as a printf format
+@@ -49,26 +48,48 @@
+ 
+ int
+ make_path (char *argpath,
++	   int mode,
++	   int parent_mode,
+ 	   uid_t owner,
+ 	   gid_t group,
+-	   const char *verbose_fmt_string)
++	   char *verbose_fmt_string)
+ {
+   char *dirpath;		/* A copy we can scribble NULs on.  */
+   struct stat stats;
+   int retval = 0;
+-  mode_t tmpmode;
+-  mode_t invert_permissions;
+-  int we_are_root = getuid () == 0;
++  int oldmask = umask (0);
+   dirpath = alloca (strlen (argpath) + 1);
+-
+   strcpy (dirpath, argpath);
+ 
+   if (stat (dirpath, &stats))
+     {
+-      tmpmode = MODE_RWX & ~ newdir_umask;
+-      invert_permissions = we_are_root ? 0 : MODE_WXUSR & ~ tmpmode;
++      char *slash;
++      int tmp_mode;		/* Initial perms for leading dirs.  */
++      int re_protect;		/* Should leading dirs be unwritable? */
++      struct ptr_list
++      {
++	char *dirname_end;
++	struct ptr_list *next;
++      };
++      struct ptr_list *p, *leading_dirs = NULL;
++
++      /* If leading directories shouldn't be writable or executable,
++	 or should have set[ug]id or sticky bits set and we are setting
++	 their owners, we need to fix their permissions after making them.  */
++      if (((parent_mode & 0300) != 0300)
++	  || (owner != (uid_t) -1 && group != (gid_t) -1
++	      && (parent_mode & 07000) != 0))
++	{
++	  tmp_mode = 0700;
++	  re_protect = 1;
++	}
++      else
++	{
++	  tmp_mode = parent_mode;
++	  re_protect = 0;
++	}
+ 
+-      char *slash = dirpath;
++      slash = dirpath;
+       while (*slash == '/')
+ 	slash++;
+       while ((slash = strchr (slash, '/')))
+@@ -91,9 +112,10 @@ make_path (char *argpath,
+ 		  *(slash -1) = '\0';
+ 		}
+ #endif
+-	      if (mkdir (dirpath, tmpmode ^ invert_permissions))
++	      if (mkdir (dirpath, tmp_mode))
+ 		{
+ 		  error (0, errno, _("cannot make directory `%s'"), dirpath);
++		  umask (oldmask);
+ 		  return 1;
+ 		}
+ 	      else
+@@ -101,18 +123,24 @@ make_path (char *argpath,
+ 		  if (verbose_fmt_string != NULL)
+ 		    error (0, 0, verbose_fmt_string, dirpath);
+ 
+-		  if (stat (dirpath, &stats))
+-		    stat_error (dirpath);
+-		  else
++		  if (owner != (uid_t) -1 && group != (gid_t) -1
++		      && chown (dirpath, owner, group)
++#ifdef AFS
++		      && errno != EPERM
++#endif
++		      )
++		    {
++		      chown_error_details (dirpath, owner, group);
++		      retval = 1;
++		    }
++		  if (re_protect)
+ 		    {
+-		      if (owner != -1)
+-			stats.st_uid = owner;
+-		      if (group != -1)
+-			stats.st_gid = group;
+-		      
+-		      delay_set_stat (dirpath, &stats, invert_permissions);
++		      struct ptr_list *new = (struct ptr_list *)
++			alloca (sizeof (struct ptr_list));
++		      new->dirname_end = slash;
++		      new->next = leading_dirs;
++		      leading_dirs = new;
+ 		    }
+-		  
+ #ifdef HPUX_CDF
+ 		  if (iscdf)
+ 		    {
+@@ -129,6 +157,7 @@ make_path (char *argpath,
+ 	  else if (!S_ISDIR (stats.st_mode))
+ 	    {
+ 	      error (0, 0, _("`%s' exists but is not a directory"), dirpath);
++	      umask (oldmask);
+ 	      return 1;
+ 	    }
+ 
+@@ -143,7 +172,7 @@ make_path (char *argpath,
+       /* We're done making leading directories.
+ 	 Make the final component of the path. */
+ 
+-      if (mkdir (dirpath, tmpmode ^ invert_permissions))
++      if (mkdir (dirpath, mode))
  	{
- 	  stat_error (data->stat.c_name);
--	  return;
-+	  return 0;
+ 	  /* In some cases, if the final component in dirpath was `.' then we 
+ 	     just got an EEXIST error from that last mkdir().  If that's
+@@ -153,24 +182,51 @@ make_path (char *argpath,
+ 	       (!S_ISDIR (stats.st_mode) ) )
+ 	    {
+ 	      error (0, errno, _("cannot make directory `%s'"), dirpath);
++	      umask (oldmask);
+ 	      return 1;
+ 	    }
+ 	}
+-      else if (stat (dirpath, &stats))
+-	stat_error (dirpath);
+-      else
+-	{
+-	  if (owner != -1)
+-	    stats.st_uid = owner;
+-	  if (group != -1)
+-	    stats.st_gid = group;
+-	  
+-	  delay_set_stat (dirpath, &stats, invert_permissions);
+-	}
+-	
+       if (verbose_fmt_string != NULL)
+ 	error (0, 0, verbose_fmt_string, dirpath);
+ 
++      if (owner != (uid_t) -1 && group != (gid_t) -1)
++	{
++	  if (chown (dirpath, owner, group)
++#ifdef AFS
++	      && errno != EPERM
++#endif
++	      )
++	    {
++	      chown_error_details (dirpath, owner, group);
++	      retval = 1;
++	    }
++	}
++      /* chown may have turned off some permission bits we wanted.  */
++      if ((mode & 07000) != 0 && chmod (dirpath, mode))
++	{
++	  chmod_error_details (dirpath, mode);
++	  retval = 1;
++	}
++
++      /* If the mode for leading directories didn't include owner "wx"
++	 privileges, we have to reset their protections to the correct
++	 value.  */
++      for (p = leading_dirs; p != NULL; p = p->next)
++	{
++	  *p->dirname_end = '\0';
++#if 0
++	  /* cpio always calls make_path with parent mode 0700, so
++	     we don't have to do this.  If we ever do have to do this,
++	     we have to stat the directory first to get the setuid
++	     bit so we don't break HP CDF's.  */
++	  if (chmod (dirpath, parent_mode))
++	    {
++	      chmod_error_details (dirpath, parent_mode);
++	      retval = 1;
++	    }
++#endif
++
++	}
+     }
+   else
+     {
+@@ -179,10 +235,33 @@ make_path (char *argpath,
+       if (!S_ISDIR (stats.st_mode))
+ 	{
+ 	  error (0, 0, _("`%s' exists but is not a directory"), dirpath);
++	  umask (oldmask);
+ 	  return 1;
  	}
  
-       if (st.st_dev == dir_stat_info->st_dev
- 	  && st.st_ino == dir_stat_info->st_ino)
- 	{
- 	  stat_to_cpio (&data->stat, dir_stat_info);
--	  data->invert_permissions =
--	    ((dir_stat_info->st_mode ^ st.st_mode)
--	     & MODE_RWX & ~ newdir_umask);
--	  return;
-+	  data->invert_permissions = 0;
-+	  return 0;
- 	}
++      /* chown must precede chmod because on some systems,
++	 chown clears the set[ug]id bits for non-superusers,
++	 resulting in incorrect permissions.
++	 On System V, users can give away files with chown and then not
++	 be able to chmod them.  So don't give files away.  */
++
++      if (owner != (uid_t) -1 && group != (gid_t) -1
++	  && chown (dirpath, owner, group)
++#ifdef AFS
++	  && errno != EPERM
++#endif
++	  )
++	{
++	  chown_error_details (dirpath, owner, group);
++	  retval = 1;
++	}
++      if (chmod (dirpath, mode))
++	{
++	  chmod_error_details (dirpath, mode);
++	  retval = 1;
++	}
      }
  
--  ERROR ((0, 0, _("%s: Unexpected inconsistency when making directory"),
--	  quotearg_colon (dir)));
-+  return -1;
++  umask (oldmask);
+   return retval;
  }
+diff -up cpio-2.9/src/copypass.c.dir_perm cpio-2.9/src/copypass.c
+--- cpio-2.9/src/copypass.c.dir_perm	2008-03-03 11:45:00.000000000 +0100
++++ cpio-2.9/src/copypass.c	2008-03-03 11:45:00.000000000 +0100
+@@ -239,23 +239,15 @@ process_copy_pass ()
+ 		  cdf_flag = 1;
+ 		}
+ #endif
+-	      res = mkdir (output_name.ds_string, in_file_stat.st_mode & ~077);
++	      res = mkdir (output_name.ds_string, in_file_stat.st_mode);
  
- void
+ 	    }
+ 	  else
+-            {
+-              if (!no_chown_flag && (out_file_stat.st_mode & 077) != 0
+-                  && chmod (output_name.ds_string, out_file_stat.st_mode & 07700) < 0)
+-                {
+-                  error (0, errno, "%s: chmod", output_name.ds_string);
+-                  continue;
+-                }
+-              res = 0;
+-            }
++	    res = 0;
+ 	  if (res < 0 && create_dir_flag)
+ 	    {
+ 	      create_all_directories (output_name.ds_string);
+-	      res = mkdir (output_name.ds_string, in_file_stat.st_mode & ~077);
++	      res = mkdir (output_name.ds_string, in_file_stat.st_mode);
+ 	    }
+ 	  if (res < 0)
+ 	    {
+@@ -298,12 +290,12 @@ process_copy_pass ()
+ 
+ 	  if (link_res < 0)
+ 	    {
+-	      res = mknod (output_name.ds_string, in_file_stat.st_mode & ~077,
++	      res = mknod (output_name.ds_string, in_file_stat.st_mode,
+ 			   in_file_stat.st_rdev);
+ 	      if (res < 0 && create_dir_flag)
+ 		{
+ 		  create_all_directories (output_name.ds_string);
+-		  res = mknod (output_name.ds_string, in_file_stat.st_mode & ~077,
++		  res = mknod (output_name.ds_string, in_file_stat.st_mode,
+ 			       in_file_stat.st_rdev);
+ 		}
+ 	      if (res < 0)
+@@ -373,8 +365,6 @@ process_copy_pass ()
+   if (dot_flag)
+     fputc ('\n', stderr);
+ 
+-  apply_delayed_set_stat ();
+-  
+   if (!quiet_flag)
+     {
+       size_t blocks = (output_bytes + io_block_size - 1) / io_block_size;
