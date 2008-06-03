@@ -2,20 +2,18 @@
 
 Summary: A GNU archiving program
 Name: cpio
-Version: 2.9
-Release: 7%{?dist}
+Version: 2.9.90
+Release: 1%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
-Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.gz
+Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
 Source1: cpio.1
 Patch1: cpio-2.6-setLocale.patch
 Patch2: cpio-2.9-rh.patch
 Patch3: cpio-2.9-chmodRaceC.patch
 Patch4: cpio-2.9-exitCode.patch
-Patch5: cpio-2.9-safer_name_suffix.patch
-Patch6: cpio-2.9-gcc43.patch
-Patch7: cpio-2.9-dir_perm.patch
+Patch5: cpio-2.9-dir_perm.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 BuildRequires: texinfo, autoconf, gettext
@@ -41,9 +39,7 @@ Install cpio if you need a program to manage file archives.
 %patch2  -p1 -b .rh
 %patch3  -p1 -b .chmodRaceC
 %patch4  -p1 -b .exitCode
-%patch5  -p1 -b .safer_name_suffix
-%patch6  -p1 -b .gcc43
-%patch7  -p1 -b .dir_perm
+%patch5  -p1 -b .dir_perm
 
 autoheader
 
@@ -84,6 +80,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue Jun 02 2008 Ondrej Vasik <ovasik@redhat.com> 2.9.90-1
+- new upstream alpha version 2.9.90 + removed applied patches
+
 * Mon Mar 03 2008 Radek Brich <rbrich@redhat.com> 2.9-7
 - fix -dir_perm patch to restore permissions correctly even
   in passthrough mode -- revert affected code to cpio 2.8 state
