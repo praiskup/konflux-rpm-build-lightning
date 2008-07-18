@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.9.90
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -15,6 +15,7 @@ Patch2: cpio-2.9-rh.patch
 Patch3: cpio-2.9-chmodRaceC.patch
 Patch4: cpio-2.9-exitCode.patch
 Patch5: cpio-2.9-dir_perm.patch
+Patch6: cpio-2.9-dev_number.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 BuildRequires: texinfo, autoconf, gettext
@@ -41,6 +42,7 @@ Install cpio if you need a program to manage file archives.
 %patch3  -p1 -b .chmodRaceC
 %patch4  -p1 -b .exitCode
 %patch5  -p1 -b .dir_perm
+%patch6  -p1 -b .dev_number
 
 autoheader
 
@@ -81,6 +83,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Fri Jul 18 2008 Kamil Dudka <kdudka@redhat.com> 2.9.90-2
+- Support major/minor device numbers over 127 (bz#450109)
+
 * Tue Jun 02 2008 Ondrej Vasik <ovasik@redhat.com> 2.9.90-1
 - new upstream alpha version 2.9.90 + removed applied patches
 
