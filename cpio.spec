@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.9.90
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -17,9 +17,10 @@ Patch4: cpio-2.9-exitCode.patch
 Patch5: cpio-2.9-dir_perm.patch
 Patch6: cpio-2.9-dev_number.patch
 Patch7: cpio-2.9-sys_umask.patch
+Patch8: cpio-2.9.90-defaultremoteshell.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
-BuildRequires: texinfo, autoconf, gettext
+BuildRequires: texinfo, autoconf, gettext, rmt
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -45,12 +46,13 @@ Install cpio if you need a program to manage file archives.
 %patch5  -p1 -b .dir_perm
 %patch6  -p1 -b .dev_number
 %patch7  -p1 -b .sys_umask
+%patch8  -p1 -b .defaultremote
 
 autoheader
 
 %build
 
-CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -Wall" %configure
+CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -Wall" %configure --with-rmt="%{_sysconfdir}/rmt"
 make %{?_smp_mflags}
 
 %install
@@ -85,6 +87,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon Mar  9 2009 Ondrej Vasik <ovasik@redhat.com> 2.9.90-5
+- define default remote shell as /usr/bin/ssh(#452904)
+- use /etc/rmt as default rmt command
+
 * Tue Feb 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.9.90-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
 
