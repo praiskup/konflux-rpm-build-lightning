@@ -2,13 +2,12 @@
 
 Summary: A GNU archiving program
 Name: cpio
-Version: 2.9.90
-Release: 5%{?dist}
+Version: 2.10
+Release: 1%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
-#Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
-Source: ftp://alpha.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
+Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
 Source1: cpio.1
 Patch1: cpio-2.6-setLocale.patch
 Patch2: cpio-2.9-rh.patch
@@ -87,6 +86,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon Jun 22 2009 Ondrej Vasik <ovasik@redhat.com> 2.10-1
+- new upstream release 2.10
+
 * Mon Mar  9 2009 Ondrej Vasik <ovasik@redhat.com> 2.9.90-5
 - define default remote shell as /usr/bin/ssh(#452904)
 - use /etc/rmt as default rmt command
