@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.10
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -71,11 +71,15 @@ install -c -p -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
 rm -rf ${RPM_BUILD_ROOT}
 
 %post
-/sbin/install-info %{_infodir}/cpio.info.gz %{_infodir}/dir || :
+if [ -f %{_infodir}/cpio.info.gz ]; then
+	/sbin/install-info %{_infodir}/cpio.info.gz %{_infodir}/dir || :
+fi
 
 %preun
 if [ $1 = 0 ]; then
-	/sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
+	if [ -f %{_infodir}/cpio.info.gz ]; then
+		/sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
+	fi
 fi
 
 %files -f %{name}.lang
@@ -86,6 +90,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Thu Aug 06 2009 Ondrej Vasik <ovasik@redhat.com> 2.10-3
+- do process install-info only without --excludedocs(#515924)
+
 * Fri Jul 24 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.10-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
