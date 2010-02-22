@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.10
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -18,6 +18,7 @@ Patch6: cpio-2.9-dev_number.patch
 Patch7: cpio-2.9-sys_umask.patch
 Patch8: cpio-2.9.90-defaultremoteshell.patch
 Patch9: cpio-2.10-utimens.patch
+Patch10: cpio-2.10-patternnamesigsegv.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 BuildRequires: texinfo, autoconf, gettext, rmt
@@ -48,6 +49,7 @@ Install cpio if you need a program to manage file archives.
 %patch7  -p1 -b .sys_umask
 %patch8  -p1 -b .defaultremote
 %patch9  -p1 -b .utimens
+%patch10 -p1 -b .patternsegv
 
 autoheader
 
@@ -92,6 +94,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon Feb 22 2010 Ondrej Vasik <ovasik@redhat.com> 2.10-5
+- fix segfault with nonexisting file with patternnames
+  (#567022)
+
 * Wed Jan 06 2010 Ondrej Vasik <ovasik@redhat.com> 2.10-4
 - do not fail with new POSIX 2008 utimens() glibc call
   (#552320)
