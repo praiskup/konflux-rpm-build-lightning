@@ -9,19 +9,18 @@ Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
 Source1: cpio.1
-Patch1: cpio-2.6-setLocale.patch
-Patch2: cpio-2.9-rh.patch
-Patch3: cpio-2.9-chmodRaceC.patch
-Patch4: cpio-2.9-exitCode.patch
-Patch5: cpio-2.9-dir_perm.patch
-Patch6: cpio-2.9-dev_number.patch
-Patch7: cpio-2.9-sys_umask.patch
-Patch8: cpio-2.9.90-defaultremoteshell.patch
-Patch9: cpio-2.10-utimens.patch
-Patch10: cpio-2.10-patternnamesigsegv.patch
+Patch1: cpio-2.9-rh.patch
+Patch2: cpio-2.9-chmodRaceC.patch
+Patch3: cpio-2.9-exitCode.patch
+Patch4: cpio-2.9-dir_perm.patch
+Patch5: cpio-2.9-dev_number.patch
+Patch6: cpio-2.9-sys_umask.patch
+Patch7: cpio-2.9.90-defaultremoteshell.patch
+Patch8: cpio-2.10-utimens.patch
+Patch9: cpio-2.10-patternnamesigsegv.patch
 # CVE-2010-0624 fix heap-based buffer overflow by expanding
 # a specially-crafted archive(#572150)
-Patch11: cpio-2.10-rtapeliboverflow.patch
+Patch10: cpio-2.10-rtapeliboverflow.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 BuildRequires: texinfo, autoconf, gettext, rmt
@@ -43,17 +42,16 @@ Install cpio if you need a program to manage file archives.
 
 %prep
 %setup -q
-%patch1  -p1 -b .setLocale
-%patch2  -p1 -b .rh
-%patch3  -p1 -b .chmodRaceC
-%patch4  -p1 -b .exitCode
-%patch5  -p1 -b .dir_perm
-%patch6  -p1 -b .dev_number
-%patch7  -p1 -b .sys_umask
-%patch8  -p1 -b .defaultremote
-%patch9  -p1 -b .utimens
-%patch10 -p1 -b .patternsegv
-%patch11 -p1 -b .rtapelib
+%patch1  -p1 -b .rh
+%patch2  -p1 -b .chmodRaceC
+%patch3  -p1 -b .exitCode
+%patch4  -p1 -b .dir_perm
+%patch5  -p1 -b .dev_number
+%patch6  -p1 -b .sys_umask
+%patch7  -p1 -b .defaultremote
+%patch8  -p1 -b .utimens
+%patch9 -p1 -b .patternsegv
+%patch10 -p1 -b .rtapelib
 
 autoheader
 
@@ -102,7 +100,8 @@ fi
 - CVE-2010-0624 fix heap-based buffer overflow by expanding
   a specially-crafted archive(#572150)
 
-* Mon Feb 22 2010 Ondrej Vasik <ovasik@redhat.com> 2.10-5
+* Thu Feb 25 2010 Ondrej Vasik <ovasik@redhat.com> 2.10-5
+- remove redundant setLocale patch
 - fix segfault with nonexisting file with patternnames
   (#567022)
 
