@@ -9,14 +9,25 @@ Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
 Source1: cpio.1
+#We use SVR4 portable format as default .
 Patch1: cpio-2.9-rh.patch
+#fix race condition (#155749)
 Patch2: cpio-2.9-chmodRaceC.patch
+#fix warn_if_file_changed() and set exit code to 1 when cpio
+# fails to store file > 4GB (#183224)
 Patch3: cpio-2.9-exitCode.patch
+#when extracting archive created with 'find -depth',
+# restore the permissions of directories properly (bz#430835)
 Patch4: cpio-2.9-dir_perm.patch
+#Support major/minor device numbers over 127 (bz#450109)
 Patch5: cpio-2.9-dev_number.patch
+#make -d honor system umask(#484997)
 Patch6: cpio-2.9-sys_umask.patch
+#define default remote shell as /usr/bin/ssh(#452904)
 Patch7: cpio-2.9.90-defaultremoteshell.patch
+#do not fail with new POSIX 2008 utimens() glibc call(#552320)
 Patch8: cpio-2.10-utimens.patch
+#fix segfault with nonexisting file with patternnames(#567022)
 Patch9: cpio-2.10-patternnamesigsegv.patch
 # CVE-2010-0624 fix heap-based buffer overflow by expanding
 # a specially-crafted archive(#572150)
@@ -99,6 +110,7 @@ fi
 * Wed Mar 10 2010 Ondrej Vasik <ovasik@redhat.com> 2.10-6
 - CVE-2010-0624 fix heap-based buffer overflow by expanding
   a specially-crafted archive(#572150)
+- comment patches
 
 * Thu Feb 25 2010 Ondrej Vasik <ovasik@redhat.com> 2.10-5
 - remove redundant setLocale patch
