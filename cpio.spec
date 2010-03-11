@@ -2,8 +2,8 @@
 
 Summary: A GNU archiving program
 Name: cpio
-Version: 2.10
-Release: 6%{?dist}
+Version: 2.11
+Release: 1%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -11,27 +11,20 @@ Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
 Source1: cpio.1
 #We use SVR4 portable format as default .
 Patch1: cpio-2.9-rh.patch
-#fix race condition (#155749)
-Patch2: cpio-2.9-chmodRaceC.patch
 #fix warn_if_file_changed() and set exit code to 1 when cpio
 # fails to store file > 4GB (#183224)
-Patch3: cpio-2.9-exitCode.patch
+Patch2: cpio-2.9-exitCode.patch
 #when extracting archive created with 'find -depth',
 # restore the permissions of directories properly (bz#430835)
-Patch4: cpio-2.9-dir_perm.patch
+Patch3: cpio-2.9-dir_perm.patch
 #Support major/minor device numbers over 127 (bz#450109)
-Patch5: cpio-2.9-dev_number.patch
+Patch4: cpio-2.9-dev_number.patch
 #make -d honor system umask(#484997)
-Patch6: cpio-2.9-sys_umask.patch
+Patch5: cpio-2.9-sys_umask.patch
 #define default remote shell as /usr/bin/ssh(#452904)
-Patch7: cpio-2.9.90-defaultremoteshell.patch
-#do not fail with new POSIX 2008 utimens() glibc call(#552320)
-Patch8: cpio-2.10-utimens.patch
+Patch6: cpio-2.9.90-defaultremoteshell.patch
 #fix segfault with nonexisting file with patternnames(#567022)
-Patch9: cpio-2.10-patternnamesigsegv.patch
-# CVE-2010-0624 fix heap-based buffer overflow by expanding
-# a specially-crafted archive(#572150)
-Patch10: cpio-2.10-rtapeliboverflow.patch
+Patch7: cpio-2.10-patternnamesigsegv.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 BuildRequires: texinfo, autoconf, gettext, rmt
@@ -53,16 +46,13 @@ Install cpio if you need a program to manage file archives.
 
 %prep
 %setup -q
-%patch1  -p1 -b .rh
-%patch2  -p1 -b .chmodRaceC
-%patch3  -p1 -b .exitCode
-%patch4  -p1 -b .dir_perm
-%patch5  -p1 -b .dev_number
-%patch6  -p1 -b .sys_umask
-%patch7  -p1 -b .defaultremote
-%patch8  -p1 -b .utimens
-%patch9 -p1 -b .patternsegv
-%patch10 -p1 -b .rtapelib
+%patch1 -p1 -b .rh
+%patch2 -p1 -b .exitCode
+%patch3 -p1 -b .dir_perm
+%patch4 -p1 -b .dev_number
+%patch5 -p1 -b .sys_umask
+%patch6 -p1 -b .defaultremote
+%patch7 -p1 -b .patternsegv
 
 autoheader
 
@@ -87,6 +77,11 @@ install -c -p -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
+%check
+rm -f ${RPM_BUILD_ROOT}/test/testsuite
+make check
+
+
 %post
 if [ -f %{_infodir}/cpio.info.gz ]; then
 	/sbin/install-info %{_infodir}/cpio.info.gz %{_infodir}/dir || :
@@ -107,6 +102,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Thu Mar 11 2010 Ondrej Vasik <ovasik@redhat.com> 2.11-1
+- new upstream release 2.11
+- removed applied patches, run test suite
+
 * Wed Mar 10 2010 Ondrej Vasik <ovasik@redhat.com> 2.10-6
 - CVE-2010-0624 fix heap-based buffer overflow by expanding
   a specially-crafted archive(#572150)

@@ -1,10 +1,10 @@
 diff -urp cpio-2.9.90-orig/src/extern.h cpio-2.9.90/src/extern.h
 --- cpio-2.9.90-orig/src/extern.h	2008-08-25 16:42:48.000000000 +0200
 +++ cpio-2.9.90/src/extern.h	2009-02-10 16:29:34.000000000 +0100
-@@ -96,6 +96,7 @@ extern char output_is_special;
+@@ -96,6 +96,7 @@ extern char input_is_special;
+ extern char output_is_special;
  extern char input_is_seekable;
  extern char output_is_seekable;
- extern char *program_name;
 +extern mode_t sys_umask;
  extern int (*xstat) ();
  extern void (*copy_function) ();
