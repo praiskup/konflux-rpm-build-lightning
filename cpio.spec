@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -58,7 +58,7 @@ autoheader
 
 %build
 
-CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -Wall" %configure --with-rmt="%{_sysconfdir}/rmt"
+CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall" %configure --with-rmt="%{_sysconfdir}/rmt"
 make %{?_smp_mflags}
 
 %install
@@ -102,6 +102,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon May 31 2010 Ondrej Vasik <ovasik@redhat.com> 2.11-2
+- built with fno-strict-aliasing(#596153)
+
 * Thu Mar 11 2010 Ondrej Vasik <ovasik@redhat.com> 2.11-1
 - new upstream release 2.11
 - removed applied patches, run test suite
