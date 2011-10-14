@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -102,6 +102,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Fri Oct 14 2011 Ondrej Vasik <ovasik@redhat.com> 2.11-5
+- update manpage to reflect new option, polish the style (#746209)
+
 * Mon Mar 07 2011 Ondrej Vasik <ovasik@redhat.com> 2.11-4
 - fix several typos and manpage syntax(Ville Skyttä, #682470)
 
