@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -102,6 +102,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Thu Jan 12 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.11-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
 * Fri Oct 14 2011 Ondrej Vasik <ovasik@redhat.com> 2.11-5
 - update manpage to reflect new option, polish the style (#746209)
 
