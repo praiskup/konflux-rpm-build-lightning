@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -27,6 +27,7 @@ Patch6: cpio-2.9.90-defaultremoteshell.patch
 Patch7: cpio-2.10-patternnamesigsegv.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
+Provides: bundled(gnulib)
 BuildRequires: texinfo, autoconf, gettext, rmt
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -102,6 +103,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue May 15 2012 Ondrej Vasik <ovasik@redhat.com> 2.11-6
+- add virtual provides for bundled(gnulib) copylib (#821749)
+
 * Fri Oct 14 2011 Ondrej Vasik <ovasik@redhat.com> 2.11-5
 - update manpage to reflect new option, polish the style (#746209)
 
