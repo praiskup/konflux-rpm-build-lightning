@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -14,17 +14,12 @@ Patch1: cpio-2.9-rh.patch
 #fix warn_if_file_changed() and set exit code to 1 when cpio
 # fails to store file > 4GB (#183224)
 Patch2: cpio-2.9-exitCode.patch
-#when extracting archive created with 'find -depth',
-# restore the permissions of directories properly (bz#430835)
-Patch3: cpio-2.9-dir_perm.patch
 #Support major/minor device numbers over 127 (bz#450109)
-Patch4: cpio-2.9-dev_number.patch
-#make -d honor system umask(#484997)
-Patch5: cpio-2.9-sys_umask.patch
+Patch3: cpio-2.9-dev_number.patch
 #define default remote shell as /usr/bin/ssh(#452904)
-Patch6: cpio-2.9.90-defaultremoteshell.patch
+Patch4: cpio-2.9.90-defaultremoteshell.patch
 #fix segfault with nonexisting file with patternnames(#567022)
-Patch7: cpio-2.10-patternnamesigsegv.patch
+Patch5: cpio-2.10-patternnamesigsegv.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 Provides: bundled(gnulib)
@@ -49,11 +44,9 @@ Install cpio if you need a program to manage file archives.
 %setup -q
 %patch1 -p1 -b .rh
 %patch2 -p1 -b .exitCode
-%patch3 -p1 -b .dir_perm
-%patch4 -p1 -b .dev_number
-%patch5 -p1 -b .sys_umask
-%patch6 -p1 -b .defaultremote
-%patch7 -p1 -b .patternsegv
+%patch3 -p1 -b .dev_number
+%patch4 -p1 -b .defaultremote
+%patch5 -p1 -b .patternsegv
 
 autoheader
 
@@ -103,6 +96,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Wed May 30 2012 Ondrej Vasik <ovasik@redhat.com> 2.11-8
+- drop unnecessary patches: cpio-2.9-dir_perm.patch and
+  cpio-2.9-sys_umask.patch - reported by M.Castellini
+
 * Tue May 15 2012 Ondrej Vasik <ovasik@redhat.com> 2.11-7
 - add virtual provides for bundled(gnulib) copylib (#821749)
 
