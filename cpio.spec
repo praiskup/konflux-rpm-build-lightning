@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -20,6 +20,8 @@ Patch3: cpio-2.9-dev_number.patch
 Patch4: cpio-2.9.90-defaultremoteshell.patch
 #fix segfault with nonexisting file with patternnames(#567022)
 Patch5: cpio-2.10-patternnamesigsegv.patch
+#fix rawhide buildfailure by updating gnulib's stdio.in.h
+Patch6: cpio-2.11-stdio.in.patch
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 Provides: bundled(gnulib)
@@ -47,6 +49,7 @@ Install cpio if you need a program to manage file archives.
 %patch3 -p1 -b .dev_number
 %patch4 -p1 -b .defaultremote
 %patch5 -p1 -b .patternsegv
+%patch6 -p1 -b .gnulib
 
 autoheader
 
@@ -96,6 +99,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon Jun 04 2012 Ondrej Vasik <ovasik@redhat.com> 2.11-9
+- fix build failure in rawhide build system (gets undefined)
+
 * Wed May 30 2012 Ondrej Vasik <ovasik@redhat.com> 2.11-8
 - drop unnecessary patches: cpio-2.9-dir_perm.patch and
   cpio-2.9-sys_umask.patch - reported by M.Castellini
