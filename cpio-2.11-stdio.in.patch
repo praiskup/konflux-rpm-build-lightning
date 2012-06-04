@@ -1,5 +1,3 @@
-Binary files cpio-2.11-orig/gnu/.argp-eexst.c.swp and cpio-2.11/gnu/.argp-eexst.c.swp differ
-Binary files cpio-2.11-orig/gnu/.argp.h.swp and cpio-2.11/gnu/.argp.h.swp differ
 diff -urNp cpio-2.11-orig/gnu/stdio.in.h cpio-2.11/gnu/stdio.in.h
 --- cpio-2.11-orig/gnu/stdio.in.h	2010-03-10 10:27:03.000000000 +0100
 +++ cpio-2.11/gnu/stdio.in.h	2012-06-04 10:23:23.804471185 +0200
@@ -13,4 +11,3 @@ diff -urNp cpio-2.11-orig/gnu/stdio.in.h cpio-2.11/gnu/stdio.in.h
  
  #if @GNULIB_FOPEN@
  # if @REPLACE_FOPEN@
-Binary files cpio-2.11-orig/gnu/.stdio.in.h.swp and cpio-2.11/gnu/.stdio.in.h.swp differ
