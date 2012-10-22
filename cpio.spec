@@ -8,6 +8,8 @@ License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
+# help2man generated manual page distributed only in RHEL/Fedora
+Source1: cpio.1
 #We use SVR4 portable format as default .
 Patch1: cpio-2.9-rh.patch
 #fix warn_if_file_changed() and set exit code to 1 when cpio
