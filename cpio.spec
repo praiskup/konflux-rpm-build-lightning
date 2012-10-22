@@ -23,6 +23,9 @@ Patch5: cpio-2.10-patternnamesigsegv.patch
 Patch6: cpio-2.11-stdio.in.patch
 # fix bad file name splitting while creating ustar archive (#866467)
 Patch7: cpio-2.10-longnames-split.patch
+# cpio does Sum32 checksum, not CRC
+Patch8: cpio-2.11-crc-fips-nit.patch
+
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 Provides: bundled(gnulib)
@@ -52,6 +55,7 @@ Install cpio if you need a program to manage file archives.
 %patch5 -p1 -b .patternsegv
 %patch6 -p1 -b .gnulib
 %patch7 -p1 -b .longnames
+%patch8 -p1 -b .sum32-fips
 
 autoheader
 

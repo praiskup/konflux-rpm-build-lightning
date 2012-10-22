@@ -153,7 +153,7 @@ The new (\s-1SVR4\s0) portable format, which supports file systems
 having more than 65536 i\-nodes.
 .TP
 `crc'
-The new (\s-1SVR4\s0) portable format with a checksum added.
+The new (\s-1SVR4\s0) portable format with a checksum (Sum32) added.
 .TP
 `tar'
 The old tar format.
@@ -230,8 +230,8 @@ if you have permission to do so (typically an entry in that user's
 `\fB~/.rhosts\fR' file).
 .TP
 `\fB\-\-only\-verify\-crc\fR'
-Verify the \s-1CRC\s0's of each file in the archive, when reading a \s-1CRC\s0
-format archive. Don't actually extract the files.
+Verify the \s-1Sum32 checksum\s0's of each file in the archive, when reading a
+\s-1crc\s0 format archive. Don't actually extract the files.
 .TP
 `\fB\-p, \-\-pass\-through\fR'
 Run in copy-pass mode.  see \*(lqCopy\-pass mode\*(rq.
