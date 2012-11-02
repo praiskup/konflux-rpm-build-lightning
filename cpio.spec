@@ -27,6 +27,8 @@ Patch6: cpio-2.11-stdio.in.patch
 Patch7: cpio-2.10-longnames-split.patch
 # cpio does Sum32 checksum, not CRC
 Patch8: cpio-2.11-crc-fips-nit.patch
+# allow to build since the glibc is not fixed yet (see: #872336)
+Patch9: cpio-2.11-temporary-allow-build.patch
 
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
@@ -58,6 +60,7 @@ Install cpio if you need a program to manage file archives.
 %patch6 -p1 -b .gnulib
 %patch7 -p1 -b .longnames
 %patch8 -p1 -b .sum32-fips
+%patch9 -p1 -b .allow-to-build
 
 autoheader
 
@@ -109,6 +112,8 @@ fi
 %changelog
 * Fri Nov 02 2012 Pavel Raiskup <praiskup@redhat.com> - 2.11-14
 - fix bad changelog entries
+- allow to build in Fedora Rawhide (temporarily because of #872336) (the value
+  is guessed from from /usr/include/asm-generic/fcntl.h)
 
 * Mon Oct 22 2012 Pavel Raiskup <praiskup@redhat.com> 2.11-13
 - move RH-only manual page cpio.1 from look-aside cache into dist-git repository
