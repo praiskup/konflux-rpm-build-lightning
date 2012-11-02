@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -107,10 +107,13 @@ fi
 %{_infodir}/*.info*
 
 %changelog
-* Mon Oct 22 2012 Pavel Raiskup <praiskup@redhat.com> 2:10-13
+* Fri Nov 02 2012 Pavel Raiskup <praiskup@redhat.com> - 2.11-14
+- fix bad changelog entries
+
+* Mon Oct 22 2012 Pavel Raiskup <praiskup@redhat.com> 2.11-13
 - move RH-only manual page cpio.1 from look-aside cache into dist-git repository
 
-* Thu Oct 18 2012 Pavel Raiskup <praiskup@redhat.com> 2:10-12
+* Thu Oct 18 2012 Pavel Raiskup <praiskup@redhat.com> 2.11-12
 - fix for bad file name splitting while creating ustar archive (#866467)
 
 * Wed Aug 29 2012 Ondrej Vasik <ovasik@redhat.com> 2.11-11
