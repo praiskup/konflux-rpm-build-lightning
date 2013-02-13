@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 15%{?dist}
+Release: 16%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -107,6 +107,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.11-16
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
 * Mon Nov 05 2012 Pavel Raiskup <praiskup@redhat.com> - 2.11-15
 - disable the temporary O_SYNC fix (glibc is fixed - #872366)
 
