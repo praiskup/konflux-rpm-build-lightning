@@ -1,5 +1,3 @@
-%define _bindir /bin
-
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
@@ -103,7 +101,6 @@ if [ $1 = 0 ]; then
 fi
 
 %files -f %{name}.lang
-%defattr(-,root,root,0755)
 %doc AUTHORS ChangeLog NEWS README THANKS TODO COPYING
 %{_bindir}/*
 %{_mandir}/man*/*
@@ -112,6 +109,7 @@ fi
 %changelog
 * Mon Mar 11 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-17
 - fix small memory leak in copyin.c (#919454)
+- remove %%defattr and install 'cpio' to real %%{_bindir}
 
 * Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.11-16
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
