@@ -55,7 +55,7 @@ Install cpio if you need a program to manage file archives.
 %patch3 -p1 -b .dev_number
 %patch4 -p1 -b .defaultremote
 %patch5 -p1 -b .patternsegv
-%patch6 -p1 -b .gnulib
+%patch6 -p1 -b .gnulib %{?_rawbuild}
 %patch7 -p1 -b .longnames
 %patch8 -p1 -b .sum32-fips
 %patch9 -p1 -b .memleak-richard
@@ -110,6 +110,7 @@ fi
 * Mon Mar 11 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-17
 - fix small memory leak in copyin.c (#919454)
 - remove %%defattr and install 'cpio' to real %%{_bindir}
+- CovScan: add %%{?_rawbuild}
 
 * Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.11-16
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
