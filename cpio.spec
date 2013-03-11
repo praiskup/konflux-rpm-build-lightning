@@ -3,7 +3,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -27,6 +27,8 @@ Patch6: cpio-2.11-stdio.in.patch
 Patch7: cpio-2.10-longnames-split.patch
 # cpio does Sum32 checksum, not CRC
 Patch8: cpio-2.11-crc-fips-nit.patch
+# fix memory leak (#919454) (downstream)
+Patch9: cpio-2.11-fix-memory-leak-in-copyin.patch
 
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
@@ -58,6 +60,7 @@ Install cpio if you need a program to manage file archives.
 %patch6 -p1 -b .gnulib
 %patch7 -p1 -b .longnames
 %patch8 -p1 -b .sum32-fips
+%patch9 -p1 -b .memleak-richard
 
 autoheader
 
@@ -107,6 +110,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon Mar 11 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-17
+- fix small memory leak in copyin.c (#919454)
+
 * Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.11-16
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
