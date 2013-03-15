@@ -57,7 +57,6 @@ Install cpio if you need a program to manage file archives.
 %patch6 -p1 -b .gnulib %{?_rawbuild}
 %patch7 -p1 -b .longnames
 %patch8 -p1 -b .sum32-fips
-%patch9 -p1 -b .memleak-richard
 
 autoheader
 
