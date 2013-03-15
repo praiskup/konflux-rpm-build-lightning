@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 18%{?dist}
+Release: 19%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -25,8 +25,6 @@ Patch6: cpio-2.11-stdio.in.patch
 Patch7: cpio-2.10-longnames-split.patch
 # cpio does Sum32 checksum, not CRC
 Patch8: cpio-2.11-crc-fips-nit.patch
-# fix memory leak (#919454) (downstream)
-Patch9: cpio-2.11-fix-memory-leak-in-copyin.patch
 
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
@@ -108,6 +106,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Fri Mar 15 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-19
+- revert the fix for memory leak (at least for now) #921725
+
 * Tue Mar 12 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-18
 - explicitly provide /bin/cpio for packages that are dependant on this file
 
