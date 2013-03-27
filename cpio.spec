@@ -34,7 +34,7 @@ Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 Provides: bundled(gnulib)
 Provides: /bin/cpio
-BuildRequires: texinfo, autoconf, gettext, rmt
+BuildRequires: texinfo, autoconf, automake, gettext, rmt
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
