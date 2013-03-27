@@ -26,6 +26,10 @@ Patch7: cpio-2.10-longnames-split.patch
 # cpio does Sum32 checksum, not CRC
 Patch8: cpio-2.11-crc-fips-nit.patch
 
+# use the config.guess/config.sub files from actual automake-1.13
+# ~> #925189
+Patch9: cpio-2.11-arm-config-sub-guess.patch
+
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 Provides: bundled(gnulib)
@@ -57,6 +61,7 @@ Install cpio if you need a program to manage file archives.
 %patch6 -p1 -b .gnulib %{?_rawbuild}
 %patch7 -p1 -b .longnames
 %patch8 -p1 -b .sum32-fips
+%patch9 -p1 -b .arm-config-guess-sub
 
 autoheader
 
@@ -107,6 +112,7 @@ fi
 %changelog
 * Wed Mar 27 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-20
 - fix another bogus date in changelog
+- update config.guess/config.sub for aarm64 build (#925189)
 
 * Fri Mar 15 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-19
 - revert the fix for memory leak (at least for now) #921725
