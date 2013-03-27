@@ -63,7 +63,7 @@ Install cpio if you need a program to manage file archives.
 %patch8 -p1 -b .sum32-fips
 %patch9 -p1 -b .arm-config-guess-sub
 
-autoheader
+autoreconf -v
 
 %build
 
@@ -113,6 +113,7 @@ fi
 * Wed Mar 27 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-20
 - fix another bogus date in changelog
 - update config.guess/config.sub for aarm64 build (#925189)
+- run autoreconf instead of autoheader
 
 * Fri Mar 15 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-19
 - revert the fix for memory leak (at least for now) #921725
