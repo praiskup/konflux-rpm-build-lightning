@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 19%{?dist}
+Release: 20%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -105,6 +105,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Wed Mar 27 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-20
+- fix another bogus date in changelog
+
 * Fri Mar 15 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-19
 - revert the fix for memory leak (at least for now) #921725
 
@@ -204,7 +207,7 @@ fi
 * Fri Jul 18 2008 Kamil Dudka <kdudka@redhat.com> 2.9.90-2
 - Support major/minor device numbers over 127 (bz#450109)
 
-* Tue Jun 02 2008 Ondrej Vasik <ovasik@redhat.com> 2.9.90-1
+* Tue Jun 03 2008 Ondrej Vasik <ovasik@redhat.com> 2.9.90-1
 - new upstream alpha version 2.9.90 + removed applied patches
 
 * Mon Mar 03 2008 Radek Brich <rbrich@redhat.com> 2.9-7
