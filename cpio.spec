@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 20%{?dist}
+Release: 21%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -66,8 +66,8 @@ Install cpio if you need a program to manage file archives.
 autoreconf -v
 
 %build
-
-CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall" %configure --with-rmt="%{_sysconfdir}/rmt"
+export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall"
+%configure --with-rmt="%{_sbindir}/rmt"
 make %{?_smp_mflags}
 
 %install
@@ -110,6 +110,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Thu Jun 20 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-21
+- the symlink /etc/rmt should be removed in future (related to #966066)
+
 * Wed Mar 27 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-20
 - fix another bogus date in changelog
 - update config.guess/config.sub for aarm64 build (#925189)
