@@ -26,13 +26,9 @@ Patch7: cpio-2.10-longnames-split.patch
 # cpio does Sum32 checksum, not CRC
 Patch8: cpio-2.11-crc-fips-nit.patch
 
-# use the config.guess/config.sub files from actual automake-1.13
-# ~> #925189
-Patch9: cpio-2.11-arm-config-sub-guess.patch
-
 # Properly trim "crc" checksum to 32 bit number
 # ~> downstream
-Patch10: cpio-2.11-crc-large-files.patch
+Patch9: cpio-2.11-crc-large-files.patch
 
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
@@ -65,8 +61,7 @@ Install cpio if you need a program to manage file archives.
 %patch6 -p1 -b .gnulib %{?_rawbuild}
 %patch7 -p1 -b .longnames
 %patch8 -p1 -b .sum32-fips
-%patch9 -p1 -b .arm-config-guess-sub
-%patch10 -p1 -b .crc-big-files
+%patch9 -p1 -b .crc-big-files
 
 autoreconf -v
 
@@ -117,6 +112,7 @@ fi
 %changelog
 * Fri Sep 20 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-22
 - properly trim "crc" checksum to 32 bits (#1001965)
+- remove unneeded patch for config.gues/config.sub (#951442)
 
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.11-21
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
