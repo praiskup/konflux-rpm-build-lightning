@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 22%{?dist}
+Release: 23%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -110,7 +110,7 @@ fi
 %{_infodir}/*.info*
 
 %changelog
-* Fri Sep 20 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-22
+* Fri Sep 20 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-23
 - properly trim "crc" checksum to 32 bits (#1001965)
 - remove unneeded patch for config.gues/config.sub (#951442)
 
