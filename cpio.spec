@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 23%{?dist}
+Release: 24%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -29,6 +29,11 @@ Patch8: cpio-2.11-crc-fips-nit.patch
 # Properly trim "crc" checksum to 32 bit number
 # ~> downstream
 Patch9: cpio-2.11-crc-large-files.patch
+
+# Allow treat read() errors by changing type of input_size to signed integer.
+# ~> downstream
+# ~> http://lists.gnu.org/archive/html/bug-cpio/2013-09/msg00005.html
+Patch10: cpio-2.11-treat-read-errors.patch
 
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
@@ -62,6 +67,7 @@ Install cpio if you need a program to manage file archives.
 %patch7 -p1 -b .longnames
 %patch8 -p1 -b .sum32-fips
 %patch9 -p1 -b .crc-big-files
+%patch10 -p1 -b .treat-read-errors
 
 autoreconf -v
 
@@ -110,9 +116,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
-* Fri Sep 20 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-23
+* Mon Sep 30 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-24
 - properly trim "crc" checksum to 32 bits (#1001965)
 - remove unneeded patch for config.gues/config.sub (#951442)
+- allow treat read() errors (#996150)
 
 * Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.11-21
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
