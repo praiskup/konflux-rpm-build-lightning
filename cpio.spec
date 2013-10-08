@@ -27,7 +27,7 @@ Patch7: cpio-2.10-longnames-split.patch
 Patch8: cpio-2.11-crc-fips-nit.patch
 
 # Properly trim "crc" checksum to 32 bit number
-# ~> downstream
+# ~> upstream
 Patch9: cpio-2.11-crc-large-files.patch
 
 # Allow treat read() errors by changing type of input_size to signed integer.
