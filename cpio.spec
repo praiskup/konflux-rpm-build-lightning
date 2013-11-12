@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 24%{?dist}
+Release: 25%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -69,7 +69,7 @@ Install cpio if you need a program to manage file archives.
 %patch9 -p1 -b .crc-big-files
 %patch10 -p1 -b .treat-read-errors
 
-autoreconf -v
+autoreconf -vfi
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall $CFLAGS"
@@ -116,6 +116,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue Nov 12 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-25
+- fix build for ppc64le (#1029540)
+
 * Mon Sep 30 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-24
 - properly trim "crc" checksum to 32 bits (#1001965)
 - remove unneeded patch for config.gues/config.sub (#951442)
