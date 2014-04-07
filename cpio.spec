@@ -35,6 +35,11 @@ Patch9: cpio-2.11-crc-large-files.patch
 # ~> http://lists.gnu.org/archive/html/bug-cpio/2013-09/msg00005.html
 Patch10: cpio-2.11-treat-read-errors.patch
 
+# Small typo in RU translation
+# ~> #1075510
+# ~> downstream?
+Patch11: cpio-2.11-ru-translation.patch
+
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 Provides: bundled(gnulib)
@@ -68,6 +73,7 @@ Install cpio if you need a program to manage file archives.
 %patch8 -p1 -b .sum32-fips
 %patch9 -p1 -b .crc-big-files
 %patch10 -p1 -b .treat-read-errors
+%patch11 -p1 -b .ru-translation
 
 autoreconf -vfi
 
@@ -75,6 +81,8 @@ autoreconf -vfi
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall $CFLAGS"
 %configure --with-rmt="%{_sysconfdir}/rmt"
 make %{?_smp_mflags}
+(cd po && make update-gmo)
+
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
@@ -118,6 +126,7 @@ fi
 %changelog
 * Mon Apr 07 2014 Pavel Raiskup <praiskup@redhat.com> - 2.11-26
 - fix manual page to warn users about inode truncation (#952313)
+- fix for RU translation (#1075510)
 
 * Tue Nov 12 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-25
 - fix build for ppc64le (#1029540)
