@@ -1,6 +1,24 @@
 .TH CPIO 1L \" -*- nroff -*-
 .SH NAME
 cpio \- copy files to and from archives
+.SH __WARNING__
+.PP
+The cpio utility is considered LEGACY based on POSIX specification.  Users are
+encouraged to use other archiving tools for archive creation.
+
+If you decided to use cpio, you should almost always force cpio to use the
+ustar format in copy-out mode by the -H option (cpio -o -H ustar).  This is
+because the ustar format is well defined in POSIX specification and thus
+readable by wide range of other archiving tools (including tar e.g.).
+
+By default, GNU cpio uses (for historical reasons) the very old binary format
+('bin') which has significant problems nowadays, e.g. with storing big inode
+numbers (see the Red Hat bug #952313).
+
+Note also that these days the modern 'pax' archive format should be considered
+as the default -- but this format is not implemented in GNU cpio.  You should,
+again, consider using other archivers (e.g. 'tar --format=pax').
+
 .SH SYNOPSIS
 \&\fBCopy-out mode\fR
 .PP

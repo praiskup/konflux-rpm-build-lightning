@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 25%{?dist}
+Release: 26%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -116,6 +116,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon Apr 07 2014 Pavel Raiskup <praiskup@redhat.com> - 2.11-26
+- fix manual page to warn users about inode truncation (#952313)
+
 * Tue Nov 12 2013 Pavel Raiskup <praiskup@redhat.com> - 2.11-25
 - fix build for ppc64le (#1029540)
 
