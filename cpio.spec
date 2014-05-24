@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 26%{?dist}
+Release: 27%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -30,9 +30,10 @@ Patch8: cpio-2.11-crc-fips-nit.patch
 # ~> upstream
 Patch9: cpio-2.11-crc-large-files.patch
 
-# Allow treat read() errors by changing type of input_size to signed integer.
+# Allow treat read() errors by checking for SAFE_READ_ERROR
 # ~> downstream
 # ~> http://lists.gnu.org/archive/html/bug-cpio/2013-09/msg00005.html
+# ~> http://lists.gnu.org/archive/html/bug-cpio/2014-05/msg00001.html
 Patch10: cpio-2.11-treat-read-errors.patch
 
 # Small typo in RU translation
@@ -124,6 +125,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Sat May 24 2014 Pavel Raiskup <praiskup@redhat.com> - 2.11-27
+- better fix for bad read() error checking (#996150)
+
 * Mon Apr 07 2014 Pavel Raiskup <praiskup@redhat.com> - 2.11-26
 - fix manual page to warn users about inode truncation (#952313)
 - fix for RU translation (#1075510)
