@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 27%{?dist}
+Release: 28%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -125,6 +125,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.11-28
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Sat May 24 2014 Pavel Raiskup <praiskup@redhat.com> - 2.11-27
 - better fix for bad read() error checking (#996150)
 
