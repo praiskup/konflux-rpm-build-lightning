@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 30%{?dist}
+Release: 31%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -41,6 +41,16 @@ Patch10: cpio-2.11-treat-read-errors.patch
 # ~> downstream?
 Patch11: cpio-2.11-ru-translation.patch
 
+# heap-based buffer overrun
+# ~> #1167573
+# ~> upstream: git diff 3945f9db..58df4f1b
+Patch12: cpio-2.11-CVE-2014-9112.patch
+
+# Related to CVE-2014-9112 patch.
+# ~> reported upstream:
+#    http://lists.gnu.org/archive/html/bug-cpio/2014-12/msg00005.html
+Patch13: cpio-2.11-testsuite-CVE-2014-9112.patch
+
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 Provides: bundled(gnulib)
@@ -75,6 +85,8 @@ Install cpio if you need a program to manage file archives.
 %patch9 -p1 -b .crc-big-files
 %patch10 -p1 -b .treat-read-errors
 %patch11 -p1 -b .ru-translation
+%patch12 -p1 -b .CVE-2014-9112
+%patch13 -p1 -b .testsuite-cve
 
 autoreconf -vfi
 
@@ -127,6 +139,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Tue Dec 02 2014 Pavel Raiskup <praiskup@redhat.com> - 2.11-31
+- fix for CVE-2014-9112 (#1167573)
+
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.11-30
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
