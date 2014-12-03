@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 32%{?dist}
+Release: 33%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -143,6 +143,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Wed Dec 03 2014 Pavel Raiskup <praiskup@redhat.com> - 2.11-33
+- the stored archive in testsuite has little endian headers, expect also
+  'reversed byte-order' warning on big-endian
+
 * Wed Dec 03 2014 Pavel Raiskup <praiskup@redhat.com> - 2.11-32
 - adjust the testsuite fix for CVE-2014-9112 (#1167573)
 - put the testsuite.log to standard output if make check fails
