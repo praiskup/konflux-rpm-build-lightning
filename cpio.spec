@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 31%{?dist}
+Release: 32%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -115,7 +115,11 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %check
 rm -f ${RPM_BUILD_ROOT}/test/testsuite
-make check
+make check || {
+    echo "### TESTSUITE.LOG ###"
+    cat tests/testsuite.log
+    exit 1
+}
 
 
 %post
@@ -139,6 +143,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Wed Dec 03 2014 Pavel Raiskup <praiskup@redhat.com> - 2.11-32
+- adjust the testsuite fix for CVE-2014-9112 (#1167573)
+- put the testsuite.log to standard output if make check fails
+
 * Tue Dec 02 2014 Pavel Raiskup <praiskup@redhat.com> - 2.11-31
 - fix for CVE-2014-9112 (#1167573)
 
