@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.11
-Release: 33%{?dist}
+Release: 34%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -143,6 +143,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Sat Feb 21 2015 Till Maas <opensource@till.name> - 2.11-34
+- Rebuilt for Fedora 23 Change
+  https://fedoraproject.org/wiki/Changes/Harden_all_packages_with_position-independent_code
+
 * Wed Dec 03 2014 Pavel Raiskup <praiskup@redhat.com> - 2.11-33
 - the stored archive in testsuite has little endian headers, expect also
   'reversed byte-order' warning on big-endian
