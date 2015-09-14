@@ -1,55 +1,41 @@
 Summary: A GNU archiving program
 Name: cpio
-Version: 2.11
-Release: 36%{?dist}
+Version: 2.12
+Release: 1%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
+
 # help2man generated manual page distributed only in RHEL/Fedora
 Source1: cpio.1
-#We use SVR4 portable format as default .
+
+# We use SVR4 portable format as default.
 Patch1: cpio-2.9-rh.patch
-#fix warn_if_file_changed() and set exit code to 1 when cpio
-# fails to store file > 4GB (#183224)
+
+# fix warn_if_file_changed() and set exit code to 1 when cpio fails to store
+# file > 4GB (#183224)
+# http://lists.gnu.org/archive/html/bug-cpio/2006-11/msg00000.html
 Patch2: cpio-2.9-exitCode.patch
-#Support major/minor device numbers over 127 (bz#450109)
+
+# Support major/minor device numbers over 127 (bz#450109)
+# http://lists.gnu.org/archive/html/bug-cpio/2008-07/msg00000.html
 Patch3: cpio-2.9-dev_number.patch
-#define default remote shell as /usr/bin/ssh(#452904)
+
+# Define default remote shell as /usr/bin/ssh (#452904)
 Patch4: cpio-2.9.90-defaultremoteshell.patch
-#fix segfault with nonexisting file with patternnames(#567022)
+
+# Fix segfault with nonexisting file with patternnames (#567022)
+# http://savannah.gnu.org/bugs/index.php?28954
+# We have slightly different solution than upstream.
 Patch5: cpio-2.10-patternnamesigsegv.patch
-#fix rawhide buildfailure by updating gnulib's stdio.in.h
-Patch6: cpio-2.11-stdio.in.patch
-# fix bad file name splitting while creating ustar archive (#866467)
+
+# Fix bad file name splitting while creating ustar archive (#866467)
+# (fix backported from tar's source)
 Patch7: cpio-2.10-longnames-split.patch
-# cpio does Sum32 checksum, not CRC
+
+# Cpio does Sum32 checksum, not CRC (downstream)
 Patch8: cpio-2.11-crc-fips-nit.patch
-
-# Properly trim "crc" checksum to 32 bit number
-# ~> upstream
-Patch9: cpio-2.11-crc-large-files.patch
-
-# Allow treat read() errors by checking for SAFE_READ_ERROR
-# ~> downstream
-# ~> http://lists.gnu.org/archive/html/bug-cpio/2013-09/msg00005.html
-# ~> http://lists.gnu.org/archive/html/bug-cpio/2014-05/msg00001.html
-Patch10: cpio-2.11-treat-read-errors.patch
-
-# Small typo in RU translation
-# ~> #1075510
-# ~> downstream?
-Patch11: cpio-2.11-ru-translation.patch
-
-# heap-based buffer overrun
-# ~> #1167573
-# ~> upstream: git diff 3945f9db..58df4f1b
-Patch12: cpio-2.11-CVE-2014-9112.patch
-
-# Related to CVE-2014-9112 patch.
-# ~> reported upstream:
-#    http://lists.gnu.org/archive/html/bug-cpio/2014-12/msg00005.html
-Patch13: cpio-2.11-testsuite-CVE-2014-9112.patch
 
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
@@ -73,22 +59,7 @@ and can read archives created on machines with a different byte-order.
 Install cpio if you need a program to manage file archives.
 
 %prep
-%setup -q
-%patch1 -p1 -b .rh
-%patch2 -p1 -b .exitCode
-%patch3 -p1 -b .dev_number
-%patch4 -p1 -b .defaultremote
-%patch5 -p1 -b .patternsegv
-%patch6 -p1 -b .gnulib %{?_rawbuild}
-%patch7 -p1 -b .longnames
-%patch8 -p1 -b .sum32-fips
-%patch9 -p1 -b .crc-big-files
-%patch10 -p1 -b .treat-read-errors
-%patch11 -p1 -b .ru-translation
-%patch12 -p1 -b .CVE-2014-9112
-%patch13 -p1 -b .testsuite-cve
-
-autoreconf -vfi
+%autosetup -p1
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall $CFLAGS"
@@ -143,6 +114,10 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon Sep 14 2015 Pavel Raiskup <praiskup@redhat.com> - 2.12-1
+- rebase, per release notes
+  http://lists.gnu.org/archive/html/bug-cpio/2015-09/msg00004.html
+
 * Mon Jul 06 2015 Ondrej Vasik <ovasik@redhat.com> - 2.11-36
 - in 2015, file name in CVE-2014-9112 shows in a bit different timestamp
   format (fix FTBFS, #1239416)
