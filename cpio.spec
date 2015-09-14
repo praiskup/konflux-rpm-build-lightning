@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.12
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
@@ -114,6 +114,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Mon Sep 14 2015 Pavel Raiskup <praiskup@redhat.com> - 2.12-2
+- (re)generate manual page for new options
+
 * Mon Sep 14 2015 Pavel Raiskup <praiskup@redhat.com> - 2.12-1
 - rebase, per release notes
   http://lists.gnu.org/archive/html/bug-cpio/2015-09/msg00004.html
