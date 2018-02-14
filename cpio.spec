@@ -81,9 +81,6 @@ install -c -p -m 0644 %{SOURCE1} ${RPM_BUILD_ROOT}%{_mandir}/man1
 
 %find_lang %{name}
 
-%clean
-rm -rf ${RPM_BUILD_ROOT}
-
 %check
 rm -f ${RPM_BUILD_ROOT}/test/testsuite
 make check || {
