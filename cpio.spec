@@ -1,9 +1,8 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.12
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv3+
-Group: Applications/Archiving
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
 
@@ -37,12 +36,13 @@ Patch7: cpio-2.10-longnames-split.patch
 # Cpio does Sum32 checksum, not CRC (downstream)
 Patch8: cpio-2.11-crc-fips-nit.patch
 
+
 Requires(post): /sbin/install-info
 Requires(preun): /sbin/install-info
 Provides: bundled(gnulib)
 Provides: /bin/cpio
+BuildRequires: gcc
 BuildRequires: texinfo, autoconf, automake, gettext, gettext-devel, rmt
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
 GNU cpio copies files into or out of a cpio or tar archive.  Archives
@@ -58,8 +58,10 @@ and can read archives created on machines with a different byte-order.
 
 Install cpio if you need a program to manage file archives.
 
+
 %prep
 %autosetup -p1
+
 
 %build
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall $CFLAGS"
@@ -69,10 +71,7 @@ make %{?_smp_mflags}
 
 
 %install
-rm -rf ${RPM_BUILD_ROOT}
-
 make DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p" install
-
 
 rm -f $RPM_BUILD_ROOT%{_libexecdir}/rmt
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
@@ -95,12 +94,14 @@ if [ -f %{_infodir}/cpio.info.gz ]; then
 	/sbin/install-info %{_infodir}/cpio.info.gz %{_infodir}/dir || :
 fi
 
+
 %preun
 if [ $1 = 0 ]; then
 	if [ -f %{_infodir}/cpio.info.gz ]; then
 		/sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
 	fi
 fi
+
 
 %files -f %{name}.lang
 %doc AUTHORS ChangeLog NEWS README THANKS TODO
@@ -111,6 +112,9 @@ fi
 %{_infodir}/*.info*
 
 %changelog
+* Wed Apr 11 2018 Pavel Raiskup <praiskup@redhat.com> - 2.12-8
+- spring spec cleanup
+
 * Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2.12-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
