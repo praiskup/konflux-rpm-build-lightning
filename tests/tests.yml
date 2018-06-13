@@ -1,0 +1,20 @@
+---
+
+# This first play always runs on the local staging system
+- hosts: localhost
+  roles:
+  - role: standard-test-beakerlib
+    tags:
+    - classic
+    - container
+
+    repositories:
+    - repo: https://src.fedoraproject.org/tests/cpio.git
+      dest: "cpio"
+
+    tests:
+    - cpio/sanity-test-create-extract
+
+    required_packages:
+    - findutils         # sanity-test-create-extract needs find command
+    - cpio              # sanity-test-create-extract needs cpio command
