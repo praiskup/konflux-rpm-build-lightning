@@ -37,8 +37,6 @@ Patch7: cpio-2.10-longnames-split.patch
 Patch8: cpio-2.11-crc-fips-nit.patch
 
 
-Requires(post): /sbin/install-info
-Requires(preun): /sbin/install-info
 Provides: bundled(gnulib)
 Provides: /bin/cpio
 BuildRequires: gcc
@@ -87,20 +85,6 @@ make check || {
     cat tests/testsuite.log
     exit 1
 }
-
-
-%post
-if [ -f %{_infodir}/cpio.info.gz ]; then
-	/sbin/install-info %{_infodir}/cpio.info.gz %{_infodir}/dir || :
-fi
-
-
-%preun
-if [ $1 = 0 ]; then
-	if [ -f %{_infodir}/cpio.info.gz ]; then
-		/sbin/install-info --delete %{_infodir}/cpio.info.gz %{_infodir}/dir || :
-	fi
-fi
 
 
 %files -f %{name}.lang
