@@ -1,20 +1,17 @@
----
+# This package uses external repositories for maintaining CI test cases.
+# Please don't edit this file if possible.
 
-# This first play always runs on the local staging system
+# TODO: minimize according to
+# https://src.fedoraproject.org/rpms/tar/blob/master/f/tests/tests.yml
+
 - hosts: localhost
   roles:
   - role: standard-test-beakerlib
+    repositories:
+    - repo: https://src.fedoraproject.org/tests/cpio.git
+      dest: cpio
+      fmf_filter: "tier: 1, 2"
     tags:
     - classic
     - container
-
-    repositories:
-    - repo: https://src.fedoraproject.org/tests/cpio.git
-      dest: "cpio"
-
-    tests:
-    - cpio/sanity-test-create-extract
-
-    required_packages:
-    - findutils         # sanity-test-create-extract needs find command
-    - cpio              # sanity-test-create-extract needs cpio command
+    - atomic
