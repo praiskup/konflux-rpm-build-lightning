@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.12
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv3+
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
@@ -38,6 +38,7 @@ Patch8: cpio-2.11-crc-fips-nit.patch
 
 
 Provides: bundled(gnulib)
+Provides: bundled(paxutils)
 Provides: /bin/cpio
 BuildRequires: gcc
 BuildRequires: texinfo, autoconf, automake, gettext, gettext-devel, rmt
@@ -96,6 +97,9 @@ make check || {
 %{_infodir}/*.info*
 
 %changelog
+* Tue Feb 19 2019 Pavel Raiskup <praiskup@redhat.com> - 2.12-11
+- admit that we bundle paxutils project
+
 * Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2.12-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
