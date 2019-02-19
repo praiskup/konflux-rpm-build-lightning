@@ -2,7 +2,7 @@
 # Please don't edit this file if possible.
 
 # TODO: minimize according to
-# https://src.fedoraproject.org/rpms/tar/blob/master/f/tests/tests.yml
+# https://pagure.io/standard-test-roles/issue/294
 
 - hosts: localhost
   roles:
