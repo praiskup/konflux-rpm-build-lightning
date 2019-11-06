@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
-Version: 2.12
-Release: 12%{?dist}
+Version: 2.13
+Release: 1%{?dist}
 License: GPLv3+
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
@@ -15,11 +15,11 @@ Patch1: cpio-2.9-rh.patch
 # fix warn_if_file_changed() and set exit code to 1 when cpio fails to store
 # file > 4GB (#183224)
 # http://lists.gnu.org/archive/html/bug-cpio/2006-11/msg00000.html
-Patch2: cpio-2.9-exitCode.patch
+Patch2: cpio-2.13-exitCode.patch
 
 # Support major/minor device numbers over 127 (bz#450109)
 # http://lists.gnu.org/archive/html/bug-cpio/2008-07/msg00000.html
-Patch3: cpio-2.9-dev_number.patch
+Patch3: cpio-2.13-dev_number.patch
 
 # Define default remote shell as /usr/bin/ssh (#452904)
 Patch4: cpio-2.9.90-defaultremoteshell.patch
@@ -97,6 +97,10 @@ make check || {
 %{_infodir}/*.info*
 
 %changelog
+* Wed Nov 06 2019 Pavel Raiskup <praiskup@redhat.com> - 2.13-1
+- new upstream release, per release notes
+  https://lists.gnu.org/archive/html/bug-cpio/2019-11/msg00000.html
+
 * Wed Jul 24 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2.12-12
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
