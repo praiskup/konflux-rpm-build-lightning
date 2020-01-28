@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.13
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPLv3+
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
@@ -97,6 +97,9 @@ make check || {
 %{_infodir}/*.info*
 
 %changelog
+* Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.13-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+
 * Wed Nov 06 2019 Pavel Raiskup <praiskup@redhat.com> - 2.13-1
 - new upstream release, per release notes
   https://lists.gnu.org/archive/html/bug-cpio/2019-11/msg00000.html
