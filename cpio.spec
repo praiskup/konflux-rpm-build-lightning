@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.13
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: GPLv3+
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
@@ -36,6 +36,8 @@ Patch7: cpio-2.10-longnames-split.patch
 # Cpio does Sum32 checksum, not CRC (downstream)
 Patch8: cpio-2.11-crc-fips-nit.patch
 
+# Fix multiple definition of `program_name'
+Patch9: cpio-2.13-mutiple-definition.patch
 
 Provides: bundled(gnulib)
 Provides: bundled(paxutils)
@@ -97,6 +99,9 @@ make check || {
 %{_infodir}/*.info*
 
 %changelog
+* Thu Jan 30 2020 Than Ngo <than@redhat.com> - 2.13-3
+- Fix multiple definition of program_name
+
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2.13-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
