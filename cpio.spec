@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.13
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPLv3+
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
@@ -39,6 +39,10 @@ Patch8: cpio-2.11-crc-fips-nit.patch
 # Fix multiple definition of `program_name'
 Patch9: cpio-2.13-mutiple-definition.patch
 
+# Revert fix for CVE-2015-1197 (#1797163)
+# reverts upstream commit 45b0ee2b4
+Patch10: cpio-2.13-revert-CVE-2015-1197-fix.patch
+
 Provides: bundled(gnulib)
 Provides: bundled(paxutils)
 Provides: /bin/cpio
@@ -65,6 +69,7 @@ Install cpio if you need a program to manage file archives.
 
 
 %build
+autoreconf -fi
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall $CFLAGS"
 %configure --with-rmt="%{_sysconfdir}/rmt"
 make %{?_smp_mflags}
@@ -99,6 +104,9 @@ make check || {
 %{_infodir}/*.info*
 
 %changelog
+* Wed Feb 05 2020 Petr Kubat <pkubat@redhat.com> - 2.13-4
+- Revert fix for CVE-2015-1197 as it causes shutdown issues (#1797163)
+
 * Thu Jan 30 2020 Than Ngo <than@redhat.com> - 2.13-3
 - Fix multiple definition of program_name
 
