@@ -1,0 +1,14 @@
+/test:
+    summary:
+        Basic set of quick tests for cpio.
+    discover:
+      - name: fedora
+        how: fmf
+        filter: "tag: Tier1,Tier2,Tier3 & distros: fedora"
+        repository: "https://src.fedoraproject.org/forks/odubaj/tests/cpio.git"
+    prepare:
+        how: ansible
+        playbooks:
+            ci/fedora-rawhide.yml
+    execute:
+        how: beakerlib
