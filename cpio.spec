@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.13
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: GPLv3+
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
@@ -104,6 +104,9 @@ make check || {
 %{_infodir}/*.info*
 
 %changelog
+* Tue Apr 07 2020 Ondrej Dubaj <odubaj@redhat.com> - 2.13-5
+- Release bump due to testing of gating
+
 * Wed Feb 05 2020 Petr Kubat <pkubat@redhat.com> - 2.13-4
 - Revert fix for CVE-2015-1197 as it causes shutdown issues (#1797163)
 
