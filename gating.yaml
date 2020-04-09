@@ -1,6 +1,6 @@
 --- !Policy
 product_versions:
-  - fedora
-decision_context: osci_compose_gate
+  - fedora-*
+decision_context: bodhi_update_push_stable
 rules:
   - !PassingTestCaseRule {test_case_name: baseos-ci.koji-build.tier1.functional}
