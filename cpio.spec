@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.13
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv3+
 URL: http://www.gnu.org/software/cpio/
 Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
@@ -77,12 +77,12 @@ Install cpio if you need a program to manage file archives.
 autoreconf -fi
 export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -pedantic -fno-strict-aliasing -Wall $CFLAGS"
 %configure --with-rmt="%{_sysconfdir}/rmt"
-make %{?_smp_mflags}
+%make_build
 (cd po && make update-gmo)
 
 
 %install
-make DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p" install
+%make_install
 
 rm -f $RPM_BUILD_ROOT%{_libexecdir}/rmt
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
@@ -109,6 +109,10 @@ make check || {
 %{_infodir}/*.info*
 
 %changelog
+* Mon Jul 13 2020 Tom Stellard <tstellar@redhat.com> - 2.13-7
+- Use make macros
+- https://fedoraproject.org/wiki/Changes/UseMakeBuildInstallMacro
+
 * Mon Jun 15 2020 Ondrej Dubaj <odubaj@redhat.com> - 2.13-6
 - Extract: retain times for symlinks (#1486364)
 
