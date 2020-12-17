@@ -53,6 +53,7 @@ Provides: bundled(paxutils)
 Provides: /bin/cpio
 BuildRequires: gcc
 BuildRequires: texinfo, autoconf, automake, gettext, gettext-devel, rmt
+BuildRequires: make
 
 %description
 GNU cpio copies files into or out of a cpio or tar archive.  Archives
