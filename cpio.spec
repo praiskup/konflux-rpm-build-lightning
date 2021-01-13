@@ -3,8 +3,8 @@ Name: cpio
 Version: 2.13
 Release: 8%{?dist}
 License: GPLv3+
-URL: http://www.gnu.org/software/cpio/
-Source: ftp://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
+URL: https://www.gnu.org/software/cpio/
+Source: https://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
 
 # help2man generated manual page distributed only in RHEL/Fedora
 Source1: cpio.1
@@ -103,7 +103,6 @@ make check || {
 
 %files -f %{name}.lang
 %doc AUTHORS ChangeLog NEWS README THANKS TODO
-%{!?_licensedir:%global license %%doc}
 %license COPYING
 %{_bindir}/*
 %{_mandir}/man*/*
