@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.13
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv3+
 URL: https://www.gnu.org/software/cpio/
 Source: https://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
@@ -47,6 +47,10 @@ Patch10: cpio-2.13-revert-CVE-2015-1197-fix.patch
 # downstream patch (#1486364)
 # https://www.mail-archive.com/bug-cpio@gnu.org/msg00605.html
 Patch11: cpio-2.11-retain-symlink-times.patch
+
+# Properly drop priviledges for remote command
+# http://git.savannah.gnu.org/cgit/paxutils.git/commit/?id=d247e3c2809a37b6d0c3067251d96bb7f12555e7
+Patch12: cpio-2.13-reset-gid-uid.patch
 
 Provides: bundled(gnulib)
 Provides: bundled(paxutils)
@@ -109,6 +113,9 @@ make check || {
 %{_infodir}/*.info*
 
 %changelog
+* Thu Feb 18 2021 Ondrej Dubaj <odubaj@redhat.com> - 2.13-10
+- Properly drop priviledges for remote command
+
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.13-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
