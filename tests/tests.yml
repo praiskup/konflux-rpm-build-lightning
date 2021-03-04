@@ -8,7 +8,7 @@
   roles:
   - role: standard-test-beakerlib
     repositories:
-    - repo: https://src.fedoraproject.org/forks/odubaj/tests/cpio.git
+    - repo: https://src.fedoraproject.org/tests/cpio.git
       dest: cpio
       fmf_filter: "tag: Tier1,Tier2,Tier3"
     tags:
