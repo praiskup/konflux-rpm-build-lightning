@@ -1,7 +1,7 @@
 Summary: A GNU archiving program
 Name: cpio
 Version: 2.13
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv3+
 URL: https://www.gnu.org/software/cpio/
 Source: https://ftp.gnu.org/gnu/cpio/cpio-%{version}.tar.bz2
@@ -113,6 +113,9 @@ make check || {
 %{_infodir}/*.info*
 
 %changelog
+* Wed Jul 21 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2.13-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
 * Thu Feb 18 2021 Ondrej Dubaj <odubaj@redhat.com> - 2.13-10
 - Properly drop priviledges for remote command
 
