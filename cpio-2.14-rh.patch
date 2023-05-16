@@ -3,10 +3,10 @@ Date: Mon, 14 Sep 2015 09:27:21 +0200
 Subject: [PATCH 1/7] make '-c' equivalent to '-H newc'
 
 diff --git a/doc/cpio.texi b/doc/cpio.texi
-index e631934..a788b5d 100644
+index edf0c12..bef7ba5 100644
 --- a/doc/cpio.texi
 +++ b/doc/cpio.texi
-@@ -261,7 +261,8 @@ Sets the I/O block size to @var{block-size} * 512 bytes.
+@@ -271,7 +271,8 @@ Sets the I/O block size to @var{block-size} * 512 bytes.
  @item -B
  Set the I/O block size to 5120 bytes.
  @item -c
@@ -16,7 +16,7 @@ index e631934..a788b5d 100644
  @item -C @var{number}
  @itemx --io-size=@var{number}
  Set the I/O block size to the given @var{number} of bytes.
-@@ -343,7 +344,8 @@ Equivalent to @option{-sS}.
+@@ -354,7 +355,8 @@ Equivalent to @option{-sS}.
  @item -B
  Set the I/O block size to 5120 bytes.
  @item -c
@@ -26,7 +26,7 @@ index e631934..a788b5d 100644
  @item -C @var{number}
  @itemx --io-size=@var{number}
  Set the I/O block size to the given @var{number} of bytes.
-@@ -454,7 +456,8 @@ Sets the I/O block size to @var{block-size} * 512 bytes.
+@@ -465,7 +467,8 @@ Sets the I/O block size to @var{block-size} * 512 bytes.
  @item -B
  Set the I/O block size to 5120 bytes.
  @item -c
@@ -36,7 +36,7 @@ index e631934..a788b5d 100644
  @item -C @var{number}
  @itemx --io-size=@var{number}
  Set the I/O block size to the given @var{number} of bytes.
-@@ -600,7 +603,8 @@ block size is 512 bytes.
+@@ -614,7 +617,8 @@ block size is 512 bytes.
  
  @item -c
  [@ref{copy-in},@ref{copy-out},@ref{copy-pass}]
@@ -47,7 +47,7 @@ index e631934..a788b5d 100644
  @item -C @var{io-size}
  @itemx --io-size=@var{io-size}
 diff --git a/src/main.c b/src/main.c
-index a13861f..a875a13 100644
+index b27bd17..542a71f 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -124,7 +124,7 @@ static struct argp_option options[] = {
@@ -56,10 +56,10 @@ index a13861f..a875a13 100644
    {NULL, 'c', NULL, 0,
 -   N_("Use the old portable (ASCII) archive format"), GRID+1 },
 +   N_("Identical to \"-H newc\", use the new (SVR4) portable format. If you wish the old portable (ASCII) archive format, use \"-H odc\" instead."), GRID+1 },
-   {"dot", 'V', NULL, 0, 
+   {"dot", 'V', NULL, 0,
     N_("Print a \".\" for each file processed"), GRID+1 },
    {"io-size", 'C', N_("NUMBER"), 0,
-@@ -329,6 +329,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
+@@ -331,6 +331,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
      case 'c':		/* Use the old portable ASCII format.  */
        if (archive_format != arf_unknown)
  	USAGE_ERROR ((0, 0, _("Archive format multiply defined")));

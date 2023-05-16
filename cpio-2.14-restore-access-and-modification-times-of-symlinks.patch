@@ -1,0 +1,981 @@
+From a3eb338a40750ecfd73de7054d44e69008866621 Mon Sep 17 00:00:00 2001
+From: Sergey Poznyakoff <gray@gnu.org>
+Date: Wed, 17 May 2023 18:59:58 +0300
+Subject: [PATCH] Restore access and modification times of symlinks in copy-in
+ and copy-pass modes.
+
+* src/copyin.c: Update calls to set_file_times.
+(copyin_link,replace_symlink_placeholders): Call set_file_times if needed.
+* src/copyout.c: Update calls to set_file_times.
+* src/copypass.c (process_copy_pass): Update calls to set_file_times.
+Call set_file_times to restore times of extracted symlinks.
+* src/extern.h (set_file_times): Take additional argument.
+* src/util.c
+(set_file_times): Take additional argument.  Use fdutimensat to do the
+job.
+* tests/linktime.at: New file.
+* tests/linktime01.at: New file.
+* tests/Makefile.am: Add new files.
+* tests/testsuite.at: Include new tests.
+---
+ src/copyin.c        | 24 ++++++++++++-----
+ src/copyout.c       |  4 +--
+ src/copypass.c      | 11 ++++++--
+ src/extern.h        |  2 +-
+ src/util.c          |  7 ++---
+ tests/Makefile.am   |  4 ++-
+ tests/linktime.at   | 63 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/linktime01.at | 51 ++++++++++++++++++++++++++++++++++++
+ tests/testsuite.at  |  3 +++
+ 11 files changed, 155 insertions(+), 18 deletions(-)
+ create mode 100644 tests/linktime.at
+ create mode 100644 tests/linktime01.at
+
+diff --git a/gnu/Makefile.am b/gnu/Makefile.am
+index d63397e..a208b30 100644
+--- a/gnu/Makefile.am
++++ b/gnu/Makefile.am
+@@ -42,6 +42,7 @@
+ #  configmake \
+ #  dirname \
+ #  error \
++#  fdutimensat \
+ #  fileblocks \
+ #  fnmatch-gnu \
+ #  fseeko \
+@@ -71,7 +72,6 @@
+ #  strtoumax \
+ #  timespec \
+ #  unlocked-io \
+-#  utimens \
+ #  utimensat \
+ #  version-etc-fsf \
+ #  xalloc \
+@@ -683,6 +683,14 @@ EXTRA_DIST += dirent-private.h
+ 
+ ## end   gnulib module fdopendir
+ 
++## begin gnulib module fdutimensat
++
++libgnu_a_SOURCES += fdutimensat.c
++
++EXTRA_DIST += utimens.h
++
++## end   gnulib module fdutimensat
++
+ ## begin gnulib module fileblocks
+ 
+ if GL_COND_OBJ_FILEBLOCKS
+@@ -863,6 +871,14 @@ libgnu_a_SOURCES += full-write.h full-write.c
+ 
+ ## end   gnulib module full-write
+ 
++## begin gnulib module futimens
++
++if GL_COND_OBJ_FUTIMENS
++libgnu_a_SOURCES += futimens.c
++endif
++
++## end   gnulib module futimens
++
+ ## begin gnulib module gen-header
+ 
+ # In 'sed', replace the pattern space with a "DO NOT EDIT" comment.
+diff --git a/src/copyin.c b/src/copyin.c
+index f2babb7..29ac764 100644
+--- a/src/copyin.c
++++ b/src/copyin.c
+@@ -344,7 +344,7 @@ create_defered_links_to_skipped (struct cpio_file_stat *file_hdr,
+    empty links that are still on the deferments list.  */
+ 
+ static void
+-create_final_defers ()
++create_final_defers (void)
+ {
+   struct deferment *d;
+   int	link_res;
+@@ -619,7 +619,7 @@ copyin_device (struct cpio_file_stat* file_hdr)
+     chmod_error_details (file_hdr->c_name, file_hdr->c_mode);
+   if (retain_time_flag)
+     set_file_times (-1, file_hdr->c_name, file_hdr->c_mtime,
+-		    file_hdr->c_mtime);
++		    file_hdr->c_mtime, 0);
+ }
+ 
+ struct delayed_link
+@@ -737,12 +737,18 @@ replace_symlink_placeholders (void)
+ 		}
+ 	      if (res < 0)
+ 		symlink_error (dl->source, dl->target);
+-	      else if (!no_chown_flag)
++	      else
+ 		{
+-		  uid_t uid = set_owner_flag ? set_owner : dl->uid;
+-		  gid_t gid = set_group_flag ? set_group : dl->gid;
+-		  if (lchown (dl->target, uid, gid) < 0 && errno != EPERM)
+-		    chown_error_details (dl->target, uid, gid);
++		  if (!no_chown_flag)
++		    {
++		      uid_t uid = set_owner_flag ? set_owner : dl->uid;
++		      gid_t gid = set_group_flag ? set_group : dl->gid;
++		      if (lchown (dl->target, uid, gid) < 0 && errno != EPERM)
++			chown_error_details (dl->target, uid, gid);
++		    }
++		  if (retain_time_flag)
++		    set_file_times (-1, dl->target, dl->mtime, dl->mtime,
++				    AT_SYMLINK_NOFOLLOW);
+ 		}
+ 	    }
+ 	}
+@@ -797,6 +803,10 @@ copyin_link (struct cpio_file_stat *file_hdr, int in_file_des)
+ 	  if (lchown (file_hdr->c_name, uid, gid) < 0 && errno != EPERM)
+ 	    chown_error_details (file_hdr->c_name, uid, gid);
+ 	}
++
++      if (retain_time_flag)
++	set_file_times (-1, file_hdr->c_name, file_hdr->c_mtime,
++			file_hdr->c_mtime, AT_SYMLINK_NOFOLLOW);
+     }
+   free (link_name);
+ }
+diff --git a/src/copyout.c b/src/copyout.c
+index 6e82f4c..8fae895 100644
+--- a/src/copyout.c
++++ b/src/copyout.c
+@@ -227,7 +227,7 @@ writeout_defered_file (struct cpio_file_stat *header, int out_file_des)
+ 
+   if (reset_time_flag)
+     set_file_times (in_file_des, file_hdr.c_name, file_hdr.c_mtime,
+-		    file_hdr.c_mtime);
++		    file_hdr.c_mtime, 0);
+   if (close (in_file_des) < 0)
+     close_error (header->c_name);
+ }
+@@ -725,7 +725,7 @@ process_copy_out (void)
+ 	      if (reset_time_flag)
+ 		set_file_times (in_file_des,
+ 				orig_file_name,
+-				file_stat.st_atime, file_stat.st_mtime);
++				file_stat.st_atime, file_stat.st_mtime, 0);
+ 	      if (close (in_file_des) < 0)
+ 		close_error (orig_file_name);
+ 	      break;
+diff --git a/src/copypass.c b/src/copypass.c
+index a8280ae..09ffebb 100644
+--- a/src/copypass.c
++++ b/src/copypass.c
+@@ -193,11 +193,13 @@ process_copy_pass (void)
+ 		  set_file_times (in_file_des,
+ 				  input_name.ds_string,
+ 				  in_file_stat.st_atime,
+-				  in_file_stat.st_mtime);
++				  in_file_stat.st_mtime,
++				  0);
+ 		  set_file_times (out_file_des,
+ 				  output_name.ds_string,
+ 				  in_file_stat.st_atime,
+-				  in_file_stat.st_mtime);
++				  in_file_stat.st_mtime,
++				  0);
+ 		}
+ 
+ 	      if (close (in_file_des) < 0)
+@@ -300,6 +302,11 @@ process_copy_pass (void)
+ 		  && errno != EPERM)
+ 		chown_error_details (output_name.ds_string, uid, gid);
+ 	    }
++
++	  if (retain_time_flag)
++	    set_file_times (-1, output_name.ds_string,
++			    in_file_stat.st_atime, in_file_stat.st_mtime,
++			    AT_SYMLINK_NOFOLLOW);
+ 	  free (link_name);
+ 	}
+ #endif
+diff --git a/src/extern.h b/src/extern.h
+index 6afbdd2..d7c31b4 100644
+--- a/src/extern.h
++++ b/src/extern.h
+@@ -204,7 +204,7 @@ void write_nuls_to_file (off_t num_bytes, int out_des,
+ 
+ void set_perms (int fd, struct cpio_file_stat *header);
+ void set_file_times (int fd, const char *name, unsigned long atime,
+-		     unsigned long mtime);
++		     unsigned long mtime, int atflag);
+ void stat_to_cpio (struct cpio_file_stat *hdr, struct stat *st);
+ void cpio_to_stat (struct stat *st, struct cpio_file_stat *hdr);
+ void cpio_safer_name_suffix (char *name, bool link_target,
+diff --git a/src/util.c b/src/util.c
+index 7415e10..bc1ffb8 100644
+--- a/src/util.c
++++ b/src/util.c
+@@ -1235,12 +1235,13 @@ set_perms (int fd, struct cpio_file_stat *header)
+   if (fchmod_or_chmod (fd, header->c_name, header->c_mode) < 0)
+     chmod_error_details (header->c_name, header->c_mode);
+   if (retain_time_flag)
+-    set_file_times (fd, header->c_name, header->c_mtime, header->c_mtime);
++    set_file_times (fd, header->c_name, header->c_mtime, header->c_mtime, 0);
+ }
+ 
+ void
+ set_file_times (int fd,
+-		const char *name, unsigned long atime, unsigned long mtime)
++		const char *name, unsigned long atime, unsigned long mtime,
++		int atflag)
+ {
+   struct timespec ts[2];
+ 
+@@ -1251,7 +1252,7 @@ set_file_times (int fd,
+ 
+   /* Silently ignore EROFS because reading the file won't have upset its
+      timestamp if it's on a read-only filesystem. */
+-  if (fdutimens (fd, name, ts) < 0 && errno != EROFS)
++  if (fdutimensat (fd, AT_FDCWD, name, ts, atflag) < 0 && errno != EROFS)
+     utime_error (name);
+ }
+ 
+diff --git a/tests/Makefile.am b/tests/Makefile.am
+index 52503c9..28e259e 100644
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -57,7 +57,9 @@ TESTSUITE_AT = \
+  version.at\
+  big-block-size.at\
+  CVE-2015-1197.at\
+- CVE-2019-14866.at
++ CVE-2019-14866.at\
++ linktime.at\
++ linktime01.at
+ 
+ TESTSUITE = $(srcdir)/testsuite
+ 
+diff --git a/tests/testsuite.at b/tests/testsuite.at
+index c58cbb7..4dd2afc 100644
+--- a/tests/testsuite.at
++++ b/tests/testsuite.at
+@@ -45,3 +45,6 @@ m4_include([big-block-size.at])
+ 
+ m4_include([CVE-2015-1197.at])
+ m4_include([CVE-2019-14866.at])
++
++m4_include([linktime.at])
++m4_include([linktime01.at])
+diff --git a/m4/futimens.m4 b/m4/futimens.m4
+new file mode 100644
+index 0000000..dc0b21b
+--- /dev/null
++++ b/m4/futimens.m4
+@@ -0,0 +1,69 @@
++# serial 11
++# See if we need to provide futimens replacement.
++
++dnl Copyright (C) 2009-2023 Free Software Foundation, Inc.
++dnl This file is free software; the Free Software Foundation
++dnl gives unlimited permission to copy and/or distribute it,
++dnl with or without modifications, as long as this notice is preserved.
++
++# Written by Eric Blake.
++
++AC_DEFUN([gl_FUNC_FUTIMENS],
++[
++  AC_REQUIRE([gl_SYS_STAT_H_DEFAULTS])
++  AC_REQUIRE([AC_CANONICAL_HOST]) dnl for cross-compiles
++  AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
++  gl_CHECK_FUNCS_ANDROID([futimens], [[#include <sys/stat.h>]])
++  if test $ac_cv_func_futimens = no; then
++    HAVE_FUTIMENS=0
++    case "$gl_cv_onwards_func_futimens" in
++      future*) REPLACE_FUTIMENS=1 ;;
++    esac
++  else
++    AC_CACHE_CHECK([whether futimens works],
++      [gl_cv_func_futimens_works],
++      [AC_RUN_IFELSE([AC_LANG_PROGRAM([[
++#include <fcntl.h>
++#include <sys/stat.h>
++#include <unistd.h>
++#include <errno.h>
++]GL_MDA_DEFINES],
++     [[struct timespec ts[2];
++      int fd = creat ("conftest.file", 0600);
++      struct stat st;
++      if (fd < 0) return 1;
++      ts[0].tv_sec = 1;
++      ts[0].tv_nsec = UTIME_OMIT;
++      ts[1].tv_sec = 1;
++      ts[1].tv_nsec = UTIME_NOW;
++      errno = 0;
++      if (futimens (AT_FDCWD, NULL) == 0) return 2;
++      if (errno != EBADF) return 3;
++      if (futimens (fd, ts)) return 4;
++      sleep (1);
++      ts[0].tv_nsec = UTIME_NOW;
++      ts[1].tv_nsec = UTIME_OMIT;
++      if (futimens (fd, ts)) return 5;
++      if (fstat (fd, &st)) return 6;
++      if (st.st_ctime < st.st_atime) return 7;
++      ]])],
++         [gl_cv_func_futimens_works=yes],
++         [gl_cv_func_futimens_works=no],
++         [case "$host_os" in
++                           # Guess no on glibc systems.
++            *-gnu* | gnu*) gl_cv_func_futimens_works="guessing no" ;;
++                           # Guess no on musl systems.
++            *-musl*)       gl_cv_func_futimens_works="guessing no" ;;
++                           # Guess yes otherwise.
++            *)             gl_cv_func_futimens_works="guessing yes" ;;
++          esac
++         ])
++      rm -f conftest.file])
++    case "$gl_cv_func_futimens_works" in
++      *yes) ;;
++      *)
++        REPLACE_FUTIMENS=1
++        ;;
++    esac
++  fi
++])
+diff --git a/tests/linktime.at b/tests/linktime.at
+new file mode 100644
+index 0000000..bcee241
+--- /dev/null
++++ b/tests/linktime.at
+@@ -0,0 +1,63 @@
++# Process this file with autom4te to create testsuite.  -*- Autotest -*-
++# Copyright (C) 2023 Free Software Foundation, Inc.
++
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3, or (at your option)
++# any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License along
++# with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++AT_SETUP([restoring symlink times])
++AT_KEYWORDS([linktime copyin copypass])
++
++AT_DATA([filelist],[file
++symlink
++])
++
++AT_DATA([filelist_rev],[symlink
++file
++])
++
++AT_CHECK(
++[mkdir dir
++cd dir
++genfile --file file
++ln -s file symlink || AT_SKIP_TEST
++genfile -th --date '2 days ago' symlink || AT_SKIP_TEST
++cd ..
++])
++
++AT_CHECK(
++[time_orig=$(genfile -h -Smtime dir/symlink)
++rm -f file symlink
++cpio -D dir --quiet -o < filelist > arc.cpio
++cpio -m --quiet -i < arc.cpio
++time=$(genfile -h -Smtime symlink)
++test "$time" -eq "$time_orig"
++])
++
++AT_CHECK(
++[time_orig=$(genfile -h -Smtime dir/symlink)
++rm -f file symlink
++cpio -D dir --quiet -o < filelist_rev > arc.cpio
++cpio -m --quiet -i < arc.cpio
++time=$(genfile -h -Smtime symlink)
++test "$time" -eq "$time_orig"
++])
++
++AT_CHECK(
++[time_orig=$(genfile -h -Smtime dir/symlink)
++rm -f file symlink
++cpio -D dir -m --quiet -p . < filelist 
++time=$(genfile -h -Smtime symlink)
++test "$time" -eq "$time_orig"
++])
++
++AT_CLEANUP
+diff --git a/tests/linktime01.at b/tests/linktime01.at
+new file mode 100644
+index 0000000..9caa58f
+--- /dev/null
++++ b/tests/linktime01.at
+@@ -0,0 +1,51 @@
++# Process this file with autom4te to create testsuite.  -*- Autotest -*-
++# Copyright (C) 2023 Free Software Foundation, Inc.
++
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3, or (at your option)
++# any later version.
++
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++
++# You should have received a copy of the GNU General Public License along
++# with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++AT_SETUP([restoring delayed symlink times])
++AT_KEYWORDS([linktime copyin])
++
++AT_CHECK(
++[mkdir dir
++genfile --file dir/file1
++ln -s dir dirlink || AT_SKIP_TEST
++genfile -th --date '2 days ago' dirlink || AT_SKIP_TEST
++])
++
++AT_DATA([filelist],
++[dir
++dir/file1
++dirlink
++])
++
++AT_CHECK(
++[time_orig=$(genfile -h -Smtime dirlink)
++cpio --quiet -o < filelist > arc.cpio
++mkdir extr
++cpio -D extr --quiet --no-absolute-filenames -m -i < arc.cpio
++find extr | sort
++time=$(genfile -h -Smtime extr/dirlink)
++test "$time" -eq "$time_orig"
++],
++[0],
++[extr
++extr/dir
++extr/dir/file1
++extr/dirlink
++])
++
++AT_CLEANUP
++
++
+diff --git a/m4/gnulib-comp.m4 b/m4/gnulib-comp.m4
+index ad10592..fa0c93e 100644
+--- a/m4/gnulib-comp.m4
++++ b/m4/gnulib-comp.m4
+@@ -98,6 +98,7 @@ AC_DEFUN([gl_EARLY],
+   # Code from module fd-hook:
+   # Code from module fd-safer-flag:
+   # Code from module fdopendir:
++  # Code from module fdutimensat:
+   # Code from module fileblocks:
+   # Code from module filename:
+   # Code from module filenamecat-lgpl:
+@@ -114,6 +115,7 @@ AC_DEFUN([gl_EARLY],
+   # Code from module fstat:
+   # Code from module fstatat:
+   # Code from module full-write:
++  # Code from module futimens:
+   # Code from module gen-header:
+   # Code from module getcwd:
+   # Code from module getcwd-lgpl:
+@@ -411,6 +413,7 @@ AC_DEFUN([gl_INIT],
+                  [test $HAVE_FDOPENDIR = 0 || test $REPLACE_FDOPENDIR = 1])
+   gl_DIRENT_MODULE_INDICATOR([fdopendir])
+   gl_MODULE_INDICATOR([fdopendir])
++  gl_MODULE_INDICATOR([fdutimensat])
+   gl_FILEBLOCKS
+   gl_CONDITIONAL([GL_COND_OBJ_FILEBLOCKS],
+                  [test $ac_cv_member_struct_stat_st_blocks = no])
+@@ -475,6 +478,10 @@ AC_DEFUN([gl_INIT],
+   gl_CONDITIONAL([GL_COND_OBJ_FSTATAT],
+                  [test $HAVE_FSTATAT = 0 || test $REPLACE_FSTATAT = 1])
+   gl_SYS_STAT_MODULE_INDICATOR([fstatat])
++  gl_FUNC_FUTIMENS
++  gl_CONDITIONAL([GL_COND_OBJ_FUTIMENS],
++                 [test $HAVE_FUTIMENS = 0 || test $REPLACE_FUTIMENS = 1])
++  gl_SYS_STAT_MODULE_INDICATOR([futimens])
+   gl_FUNC_GETCWD
+   gl_CONDITIONAL([GL_COND_OBJ_GETCWD], [test $REPLACE_GETCWD = 1])
+   AM_COND_IF([GL_COND_OBJ_GETCWD], [
+@@ -1278,6 +1285,7 @@ AC_DEFUN([gl_FILE_LIST], [
+   lib/fd-safer-flag.c
+   lib/fd-safer.c
+   lib/fdopendir.c
++  lib/fdutimensat.c
+   lib/fileblocks.c
+   lib/filename.h
+   lib/filenamecat-lgpl.c
+@@ -1298,6 +1306,7 @@ AC_DEFUN([gl_FILE_LIST], [
+   lib/fstatat.c
+   lib/full-write.c
+   lib/full-write.h
++  lib/futimens.c
+   lib/getcwd-lgpl.c
+   lib/getcwd.c
+   lib/getdelim.c
+@@ -1556,6 +1565,7 @@ AC_DEFUN([gl_FILE_LIST], [
+   m4/fseeko.m4
+   m4/fstat.m4
+   m4/fstatat.m4
++  m4/futimens.m4
+   m4/getcwd-abort-bug.m4
+   m4/getcwd-path-max.m4
+   m4/getcwd.m4
+diff --git a/aclocal.m4 b/aclocal.m4
+index ce55bc1..d5bd65f 100644
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -1241,6 +1241,7 @@ m4_include([m4/fseek.m4])
+ m4_include([m4/fseeko.m4])
+ m4_include([m4/fstat.m4])
+ m4_include([m4/fstatat.m4])
++m4_include([m4/futimens.m4])
+ m4_include([m4/getcwd-abort-bug.m4])
+ m4_include([m4/getcwd-path-max.m4])
+ m4_include([m4/getcwd.m4])
+diff --git a/gnu/fdutimensat.c b/gnu/fdutimensat.c
+new file mode 100644
+index 0000000..5b801e0
+--- /dev/null
++++ b/gnu/fdutimensat.c
+@@ -0,0 +1,57 @@
++/* Set file access and modification times.
++
++   Copyright (C) 2009-2023 Free Software Foundation, Inc.
++
++   This program is free software: you can redistribute it and/or modify it
++   under the terms of the GNU General Public License as published by the
++   Free Software Foundation, either version 3 of the License, or any
++   later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
++
++/* Written by Eric Blake.  */
++
++/* derived from a function in utimens.c */
++
++#include <config.h>
++
++#include "utimens.h"
++
++#include <errno.h>
++#include <fcntl.h>
++#include <sys/stat.h>
++
++/* Set the access and modification timestamps of FD (a.k.a. FILE) to be
++   TIMESPEC[0] and TIMESPEC[1], respectively; relative to directory DIR.
++   FD must be either negative -- in which case it is ignored --
++   or a file descriptor that is open on FILE.
++   If FD is nonnegative, then FILE can be NULL, which means
++   use just futimes (or equivalent) instead of utimes (or equivalent),
++   and fail if on an old system without futimes (or equivalent).
++   If TIMESPEC is null, set the timestamps to the current time.
++   ATFLAG is passed to utimensat if FD is negative or futimens was
++   unsupported, which can allow operation on FILE as a symlink.
++   Return 0 on success, -1 (setting errno) on failure.  */
++
++int
++fdutimensat (int fd, int dir, char const *file, struct timespec const ts[2],
++             int atflag)
++{
++  int result = 1;
++  if (0 <= fd)
++    result = futimens (fd, ts);
++  if (file && (fd < 0 || (result == -1 && errno == ENOSYS)))
++    result = utimensat (dir, file, ts, atflag);
++  if (result == 1)
++    {
++      errno = EBADF;
++      result = -1;
++    }
++  return result;
++}
+diff --git a/gnu/futimens.c b/gnu/futimens.c
+new file mode 100644
+index 0000000..5bb3049
+--- /dev/null
++++ b/gnu/futimens.c
+@@ -0,0 +1,37 @@
++/* Set the access and modification time of an open fd.
++   Copyright (C) 2009-2023 Free Software Foundation, Inc.
++
++   This file is free software: you can redistribute it and/or modify
++   it under the terms of the GNU Lesser General Public License as
++   published by the Free Software Foundation, either version 3 of the
++   License, or (at your option) any later version.
++
++   This file is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public License
++   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
++
++/* written by Eric Blake */
++
++#include <config.h>
++
++#include <sys/stat.h>
++
++#include "utimens.h"
++
++/* Set the access and modification timestamps of FD to be
++   TIMESPEC[0] and TIMESPEC[1], respectively.
++   Fail with ENOSYS on systems without futimes (or equivalent).
++   If TIMESPEC is null, set the timestamps to the current time.
++   Return 0 on success, -1 (setting errno) on failure.  */
++int
++futimens (int fd, struct timespec const times[2])
++{
++  /* fdutimens also works around bugs in native futimens, when running
++     with glibc compiled against newer headers but on a Linux kernel
++     older than 2.6.32.  */
++  return fdutimens (fd, NULL, times);
++}
+diff --git a/tests/genfile.c b/tests/genfile.c
+index be4a2d3..0074c5c 100644
+--- a/tests/genfile.c
++++ b/tests/genfile.c
+@@ -77,7 +77,8 @@ enum genfile_mode
+     mode_generate,
+     mode_sparse,
+     mode_stat,
+-    mode_exec
++    mode_exec,
++    mode_set_times
+   };
+ 
+ enum genfile_mode mode = mode_generate;
+@@ -106,6 +107,9 @@ int verbose;
+ /* Quiet mode */
+ int quiet;
+ 
++/* Don't dereference symlinks (for --stat) */
++int no_dereference_option;
++
+ const char *argp_program_version = "genfile (" PACKAGE ") " VERSION;
+ const char *argp_program_bug_address = "<" PACKAGE_BUGREPORT ">";
+ static char doc[] = N_("genfile manipulates data files for GNU paxutils test suite.\n"
+@@ -155,6 +159,14 @@ static struct argp_option options[] = {
+    N_("Print contents of struct stat for each given file. Default FORMAT is: ")
+    DEFAULT_STAT_FORMAT,
+    GRP+1 },
++  {"no-dereference", 'h', NULL, 0,
++   N_("stat symbolic links instead of referenced files"),
++   GRP+1 },
++
++  {"set-times", 't', NULL, 0,
++   N_("Set access and modification times of the files to the time supplied"
++      " by --date option"),
++   GRP+1 },
+ 
+ #undef GRP
+ #define GRP 20
+@@ -348,6 +360,14 @@ parse_opt (int key, char *arg, struct argp_state *state)
+ 	stat_format = arg;
+       break;
+ 
++    case 't':
++      mode = mode_set_times;
++      break;
++
++    case 'h':
++      no_dereference_option = 1;
++      break;
++
+     case 'r':
+       mode = mode_exec;
+       checkpoint_granularity = arg ? arg : "1";
+@@ -647,7 +667,7 @@ print_stat (const char *name)
+   char *fmt, *p;
+   struct stat st;
+ 
+-  if (stat (name, &st))
++  if ((no_dereference_option ? lstat : stat) (name, &st))
+     {
+       error (0, errno, _("stat(%s) failed"), name);
+       return;
+@@ -725,6 +745,17 @@ print_stat (const char *name)
+   free (fmt);
+ }
+ 
++void
++set_times (char const *name)
++{
++  struct timespec ts[2];
++
++  ts[0] = ts[1] = touch_time;
++  if (utimensat (AT_FDCWD, name, ts, no_dereference_option ? AT_SYMLINK_NOFOLLOW : 0) != 0)
++    {
++      error (EXIT_FAILURE, errno, _("cannot set time on `%s'"), name);
++    }
++}
+ 
+ /* Exec Mode */
+ 
+@@ -740,7 +771,7 @@ exec_checkpoint (struct action *p)
+ 	struct timespec ts[2];
+ 
+ 	ts[0] = ts[1] = p->ts;
+-	if (utimensat (AT_FDCWD, p->name, ts, 0) != 0)
++	if (utimensat (AT_FDCWD, p->name, ts, no_dereference_option ? AT_SYMLINK_NOFOLLOW : 0) != 0)
+ 	  {
+ 	    error (0, errno, _("cannot set time on `%s'"), p->name);
+ 	    break;
+@@ -987,6 +1018,14 @@ main (int argc, char **argv)
+ 	print_stat (*argv++);
+       break;
+ 
++    case mode_set_times:
++      if (argc == 0)
++	error (EXIT_USAGE, 0, _("--set-times requires file names"));
++
++      while (argc--)
++	set_times (*argv++);
++      break;
++
+     case mode_sparse:
+       generate_sparse_file (argc, argv);
+       verify_file (file_name);
+diff --git a/tests/testsuite b/tests/testsuite
+index 10531d1..442ab00 100755
+--- a/tests/testsuite
++++ b/tests/testsuite
+@@ -625,6 +625,8 @@ at_help_all="1;version.at:19;cpio version;;
+ 13;big-block-size.at:17;big block size;block integer overflow;
+ 14;CVE-2015-1197.at:17;CVE-2015-1197 (--no-absolute-filenames for symlinks);;
+ 15;CVE-2019-14866.at:17;CVE-2019-14866 (tar header size overflow);;
++16;linktime.at:17;restoring symlink times;linktime copyin copypass;
++17;linktime01.at:17;restoring delayed symlink times;linktime copyin;
+ "
+ # List of the all the test groups.
+ at_groups_all=`printf "%s\n" "$at_help_all" | sed 's/;.*//'`
+@@ -638,7 +640,7 @@ at_fn_validate_ranges ()
+   for at_grp
+   do
+     eval at_value=\$$at_grp
+-    if test $at_value -lt 1 || test $at_value -gt 15; then
++    if test $at_value -lt 1 || test $at_value -gt 17; then
+       printf "%s\n" "invalid test group: $at_value" >&2
+       exit 1
+     fi
+@@ -2940,3 +2942,209 @@ $at_traceon; }
+ ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+ read at_status <"$at_status_file"
+ #AT_STOP_15
++#AT_START_16
++at_fn_group_banner 16 'linktime.at:17' \
++  "restoring symlink times" "                        "
++at_xfail=no
++(
++  printf "%s\n" "16. $at_setup_line: testing $at_desc ..."
++  $at_traceon
++
++
++
++cat >filelist <<'_ATEOF'
++file
++symlink
++_ATEOF
++
++
++cat >filelist_rev <<'_ATEOF'
++symlink
++file
++_ATEOF
++
++
++{ set +x
++printf "%s\n" "$at_srcdir/linktime.at:28: mkdir dir
++cd dir
++genfile --file file
++ln -s file symlink || exit 77
++genfile -th --date '2 days ago' symlink || exit 77
++cd ..
++"
++at_fn_check_prepare_notrace 'an embedded newline' "linktime.at:28"
++( $at_check_trace; mkdir dir
++cd dir
++genfile --file file
++ln -s file symlink || exit 77
++genfile -th --date '2 days ago' symlink || exit 77
++cd ..
++
++) >>"$at_stdout" 2>>"$at_stderr" 5>&-
++at_status=$? at_failed=false
++$at_check_filter
++at_fn_diff_devnull "$at_stderr" || at_failed=:
++at_fn_diff_devnull "$at_stdout" || at_failed=:
++at_fn_check_status 0 $at_status "$at_srcdir/linktime.at:28"
++$at_failed && at_fn_log_failure
++$at_traceon; }
++
++
++{ set +x
++printf "%s\n" "$at_srcdir/linktime.at:37: time_orig=\$(genfile -h -Smtime dir/symlink)
++rm -f file symlink
++cpio -D dir --quiet -o < filelist > arc.cpio
++cpio -m --quiet -i < arc.cpio
++time=\$(genfile -h -Smtime symlink)
++test \"\$time\" -eq \"\$time_orig\"
++"
++at_fn_check_prepare_notrace 'a $(...) command substitution' "linktime.at:37"
++( $at_check_trace; time_orig=$(genfile -h -Smtime dir/symlink)
++rm -f file symlink
++cpio -D dir --quiet -o < filelist > arc.cpio
++cpio -m --quiet -i < arc.cpio
++time=$(genfile -h -Smtime symlink)
++test "$time" -eq "$time_orig"
++
++) >>"$at_stdout" 2>>"$at_stderr" 5>&-
++at_status=$? at_failed=false
++$at_check_filter
++at_fn_diff_devnull "$at_stderr" || at_failed=:
++at_fn_diff_devnull "$at_stdout" || at_failed=:
++at_fn_check_status 0 $at_status "$at_srcdir/linktime.at:37"
++$at_failed && at_fn_log_failure
++$at_traceon; }
++
++
++{ set +x
++printf "%s\n" "$at_srcdir/linktime.at:46: time_orig=\$(genfile -h -Smtime dir/symlink)
++rm -f file symlink
++cpio -D dir --quiet -o < filelist_rev > arc.cpio
++cpio -m --quiet -i < arc.cpio
++time=\$(genfile -h -Smtime symlink)
++test \"\$time\" -eq \"\$time_orig\"
++"
++at_fn_check_prepare_notrace 'a $(...) command substitution' "linktime.at:46"
++( $at_check_trace; time_orig=$(genfile -h -Smtime dir/symlink)
++rm -f file symlink
++cpio -D dir --quiet -o < filelist_rev > arc.cpio
++cpio -m --quiet -i < arc.cpio
++time=$(genfile -h -Smtime symlink)
++test "$time" -eq "$time_orig"
++
++) >>"$at_stdout" 2>>"$at_stderr" 5>&-
++at_status=$? at_failed=false
++$at_check_filter
++at_fn_diff_devnull "$at_stderr" || at_failed=:
++at_fn_diff_devnull "$at_stdout" || at_failed=:
++at_fn_check_status 0 $at_status "$at_srcdir/linktime.at:46"
++$at_failed && at_fn_log_failure
++$at_traceon; }
++
++
++{ set +x
++printf "%s\n" "$at_srcdir/linktime.at:55: time_orig=\$(genfile -h -Smtime dir/symlink)
++rm -f file symlink
++cpio -D dir -m --quiet -p . < filelist
++time=\$(genfile -h -Smtime symlink)
++test \"\$time\" -eq \"\$time_orig\"
++"
++at_fn_check_prepare_notrace 'a $(...) command substitution' "linktime.at:55"
++( $at_check_trace; time_orig=$(genfile -h -Smtime dir/symlink)
++rm -f file symlink
++cpio -D dir -m --quiet -p . < filelist
++time=$(genfile -h -Smtime symlink)
++test "$time" -eq "$time_orig"
++
++) >>"$at_stdout" 2>>"$at_stderr" 5>&-
++at_status=$? at_failed=false
++$at_check_filter
++at_fn_diff_devnull "$at_stderr" || at_failed=:
++at_fn_diff_devnull "$at_stdout" || at_failed=:
++at_fn_check_status 0 $at_status "$at_srcdir/linktime.at:55"
++$at_failed && at_fn_log_failure
++$at_traceon; }
++
++
++  set +x
++  $at_times_p && times >"$at_times_file"
++) 5>&1 2>&1 7>&- | eval $at_tee_pipe
++read at_status <"$at_status_file"
++#AT_STOP_16
++#AT_START_17
++at_fn_group_banner 17 'linktime01.at:17' \
++  "restoring delayed symlink times" "                "
++at_xfail=no
++(
++  printf "%s\n" "17. $at_setup_line: testing $at_desc ..."
++  $at_traceon
++
++
++
++{ set +x
++printf "%s\n" "$at_srcdir/linktime01.at:20: mkdir dir
++genfile --file dir/file1
++ln -s dir dirlink || exit 77
++genfile -th --date '2 days ago' dirlink || exit 77
++"
++at_fn_check_prepare_notrace 'an embedded newline' "linktime01.at:20"
++( $at_check_trace; mkdir dir
++genfile --file dir/file1
++ln -s dir dirlink || exit 77
++genfile -th --date '2 days ago' dirlink || exit 77
++
++) >>"$at_stdout" 2>>"$at_stderr" 5>&-
++at_status=$? at_failed=false
++$at_check_filter
++at_fn_diff_devnull "$at_stderr" || at_failed=:
++at_fn_diff_devnull "$at_stdout" || at_failed=:
++at_fn_check_status 0 $at_status "$at_srcdir/linktime01.at:20"
++$at_failed && at_fn_log_failure
++$at_traceon; }
++
++
++cat >filelist <<'_ATEOF'
++dir
++dir/file1
++dirlink
++_ATEOF
++
++
++{ set +x
++printf "%s\n" "$at_srcdir/linktime01.at:33: time_orig=\$(genfile -h -Smtime dirlink)
++cpio --quiet -o < filelist > arc.cpio
++mkdir extr
++cpio -D extr --quiet --no-absolute-filenames -m -i < arc.cpio
++find extr | sort
++time=\$(genfile -h -Smtime extr/dirlink)
++test \"\$time\" -eq \"\$time_orig\"
++"
++at_fn_check_prepare_notrace 'a $(...) command substitution' "linktime01.at:33"
++( $at_check_trace; time_orig=$(genfile -h -Smtime dirlink)
++cpio --quiet -o < filelist > arc.cpio
++mkdir extr
++cpio -D extr --quiet --no-absolute-filenames -m -i < arc.cpio
++find extr | sort
++time=$(genfile -h -Smtime extr/dirlink)
++test "$time" -eq "$time_orig"
++
++) >>"$at_stdout" 2>>"$at_stderr" 5>&-
++at_status=$? at_failed=false
++$at_check_filter
++at_fn_diff_devnull "$at_stderr" || at_failed=:
++echo >>"$at_stdout"; printf "%s\n" "extr
++extr/dir
++extr/dir/file1
++extr/dirlink
++" | \
++  $at_diff - "$at_stdout" || at_failed=:
++at_fn_check_status 0 $at_status "$at_srcdir/linktime01.at:33"
++$at_failed && at_fn_log_failure
++$at_traceon; }
++
++
++  set +x
++  $at_times_p && times >"$at_times_file"
++) 5>&1 2>&1 7>&- | eval $at_tee_pipe
++read at_status <"$at_status_file"
++#AT_STOP_17
