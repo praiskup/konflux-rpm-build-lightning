@@ -102,6 +102,10 @@ make check || {
 %{_infodir}/*.info*
 
 %changelog
+* Tue May 16 2023 Lukas Javorsky <ljavorsk@redhat.com> - 2.14-1
+- Rebase to version 2.14
+- Resolves #1188590 CVE-2015-1197
+
 * Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 2.13-14
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
 
