@@ -104,7 +104,7 @@ make check || {
 %{_infodir}/*.info*
 
 %changelog
-* Tue Jan 24 2024 Lukas Javorsky <ljavorsk@redhat.com> - 2.15-1
+* Wed Jan 24 2024 Lukas Javorsky <ljavorsk@redhat.com> - 2.15-1
 - Rebase to version 2.15
 
 * Wed Jan 24 2024 Fedora Release Engineering <releng@fedoraproject.org> - 2.14-7
