@@ -37,3 +37,25 @@ index 10531d1..d69dad9 100755
  " | \
    $at_diff - "$at_stderr" || at_failed=:
  at_fn_diff_devnull "$at_stdout" || at_failed=:
+diff --git a/src/copyout.c b/src/copyout.c
+index 08f0e9e..882c834 100644
+--- a/src/copyout.c
++++ b/src/copyout.c
+@@ -496,7 +496,7 @@ write_out_binary_header (dev_t rdev,
+   if (short_hdr.c_namesize != file_hdr->c_namesize)
+     {
+       char maxbuf[UINTMAX_STRSIZE_BOUND + 1];
+-      error (0, 0, _("%s: value %s %s out of allowed range 0..%u"),
++      error (1, 0, _("%s: value %s %s out of allowed range 0..%u"),
+ 	     file_hdr->c_name, _("name size"),
+ 	     STRINGIFY_BIGINT (file_hdr->c_namesize, maxbuf), 0xFFFFu);
+       return 1;
+@@ -509,7 +509,7 @@ write_out_binary_header (dev_t rdev,
+        != file_hdr->c_filesize)
+     {
+       char maxbuf[UINTMAX_STRSIZE_BOUND + 1];
+-      error (0, 0, _("%s: value %s %s out of allowed range 0..%lu"),
++      error (1, 0, _("%s: value %s %s out of allowed range 0..%lu"),
+ 	     file_hdr->c_name, _("file size"),
+ 	     STRINGIFY_BIGINT (file_hdr->c_namesize, maxbuf), 0xFFFFFFFFlu);
+       return 1;
