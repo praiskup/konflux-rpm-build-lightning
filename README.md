@@ -16,6 +16,8 @@ Start by reviewing the [Fedora onboarding guide][onboarding].
 4.  Finally, create a new **component** within your **[tenant and
     application][tenant]**.
 
+5.  Open your RPM specific PR.
+
 [cpio]: https://src.fedoraproject.org/rpms/cpio
 [mr]: https://gitlab.com/fedora/infrastructure/konflux/tenants-config/-/merge_requests/31/diffs
 [konflux app]: https://github.com/apps/konflux-fedora
